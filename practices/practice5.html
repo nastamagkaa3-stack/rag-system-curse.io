@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Практика 5 — Семантический поиск в RAG</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/style.css">
+<style>
+  .content-block img:not(.img-grid-item) {
+    display: block;
+    max-width: 100%;
+    height: auto;
+    margin: 1.5rem auto;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  }
+  .image-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    justify-content: center;
+    margin: 1.5rem 0;
+  }
+  .image-grid figure {
+    flex: 1 1 250px;
+    margin: 0;
+    text-align: center;
+  }
+  .image-grid img {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  }
+  .image-grid figcaption {
+    font-size: 0.85rem;
+    color: #555;
+    margin-top: 0.5rem;
+  }
+  .btn-lecture {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: #1e3a5f;
+    color: white !important;
+    padding: 0.75rem 1.5rem;
+    border-radius: 40px;
+    text-decoration: none;
+    font-weight: 600;
+    margin: 1rem 0 2rem;
+    transition: background 0.2s;
+  }
+  .btn-lecture:hover {
+    background: #2c5282;
+  }
+  .criteria-table-wrap {
+    overflow-x: auto;
+    margin: 1.5rem 0;
+  }
+  .criteria-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: transparent;
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  .criteria-table th,
+  .criteria-table td {
+    padding: 0.75rem 1rem;
+    text-align: left;
+    border-bottom: 1px solid #e2e8f0;
+  }
+  .criteria-table th {
+    background: transparent;
+    color: #1e3a5f;
+    font-weight: 600;
+    border-bottom: 2px solid #cbd5e1;
+  }
+  .criteria-table tr:last-child td {
+    border-bottom: none;
+  }
+  .practice-step {
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #e2e8f0;
+  }
+  .practice-step:last-child {
+    border-bottom: none;
+  }
+  .practice-step-number {
+    display: inline-block;
+    background: #1e3a5f;
+    color: white;
+    font-weight: 700;
+    font-size: 0.85rem;
+    padding: 0.2rem 0.6rem;
+    border-radius: 20px;
+    margin-right: 0.75rem;
+  }
+  .practice-step-title {
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin: 1rem 0 0.5rem 0;
+  }
+  .file-link {
+    background: #f0f4f8;
+    padding: 0.2rem 0.4rem;
+    border-radius: 6px;
+    font-family: monospace;
+    font-size: 0.9rem;
+  }
+</style>
+</head>
+<body>
+<header class="site-header"><div class="header-inner">
+<a class="logo" href="../index.html">RAG <span>курс</span></a>
+<nav class="nav-desktop">
+<a href="../index.html">Главная</a>
+<a href="../lectures/lecture6.html">Лекции</a>
+<a href="practice5.html">Практики</a>
+<a href="../tests/test.html">Тест</a>
+</nav>
+<button type="button" class="menu-toggle" aria-expanded="false" aria-label="Меню">Меню</button>
+</div>
+<nav class="nav-mobile">
+<a href="../index.html">Главная</a>
+<a href="../lectures/lecture6.html">Лекции</a>
+<a href="practice5.html">Практики</a>
+<a href="../tests/test.html">Тест</a>
+</nav>
+</header>
+<main>
+<nav class="breadcrumb"><a href="../index.html">Главная</a> / <a href="practice1.html">Практики</a> / Практика 5</nav>
+<header class="page-header"><h1>Методическое пособие №5. Семантический поиск в RAG</h1></header>
+<div class="practice-goal"><p class="practice-goal__label">Цель занятия</p><p>Углублённое изучение семантического поиска, настройка параметров и анализ качества</p></div>
+<p class="practice-duration"><strong>Продолжительность:</strong> 4 академических часа</p>
+
+<div style="text-align: center;">
+  <a href="../lectures/lecture6.html" class="btn-lecture">📖 Перейти к лекции №6</a>
+</div>
+
+<section class="content-block">
+<h2>Пошаговая инструкция</h2>
+
+<p><strong>Теоретическое введение</strong></p>
+<p>Семантический поиск - это метод поиска по смыслу, а не по ключевым словам. В RAG-системах он является основным механизмом извлечения контекста. Для работы с русским языком мы используем модель <strong>cointegrated/rubert-tiny2</strong>, которая создаёт семантическое пространство, где русские слова и фразы располагаются по смыслу.</p>
+
+<!-- Шаг 1 -->
+<div class="practice-step">
+  <div class="practice-step-number">1</div>
+  <div class="practice-step-title">Анализ качества семантического поиска на русском языке</div>
+  <p>Создайте файл <span class="file-link">scripts/analyze_search.py</span>. Импортируйте библиотеки и отключение интернета:</p>
+  <pre><code class="language-python"># scripts/analyze_search.py
+import numpy as np
+import json
+import os
+os.environ["TRANSFORMERS_OFFLINE"] = "1"
+os.environ["HF_HUB_OFFLINE"] = "1"
+from sentence_transformers import SentenceTransformer
+from chroma_manager import ChromaVectorStore</code></pre>
+  <p><em>Импортируются библиотеки для работы с массивами данных, JSON-файлами, а также отключаются интернет-проверки для моделей, чтобы они загружались исключительно из локального кэша. Подключаются классы для работы с эмбеддингами и векторной базой данных.</em></p>
+</div>
+
+<!-- Шаг 2 -->
+<div class="practice-step">
+  <div class="practice-step-number">2</div>
+  <div class="practice-step-title">Определение класса SearchAnalyzer и его конструктора</div>
+  <pre><code class="language-python">class SearchAnalyzer:
+    """Анализатор качества семантического поиска на русском языке"""
+    
+    def __init__(self, vector_store, model_name='cointegrated/rubert-tiny2'):
+        self.vector_store = vector_store
+        print(f"Загрузка русскоязычной модели {model_name}...")
+        self.model = SentenceTransformer(model_name)</code></pre>
+  <p><em>Создаётся класс для анализа качества поиска. В конструкторе сохраняется ссылка на векторное хранилище и загружается русскоязычная модель эмбеддингов.</em></p>
+</div>
+
+<!-- Шаг 3 -->
+<div class="practice-step">
+  <div class="practice-step-number">3</div>
+  <div class="practice-step-title">Метод поиска для списка запросов</div>
+  <pre><code class="language-python">def search_queries(self, queries, n_results=3):
+    """Выполняет поиск для списка запросов"""
+    results = {}
+    
+    for query in queries:
+        search_results = self.vector_store.search(query, n_results=n_results)
+        results[query] = search_results
+    
+    return results</code></pre>
+  <p><em>Метод принимает список поисковых запросов, для каждого выполняет поиск в векторной БД и возвращает словарь с результатами.</em></p>
+</div>
+
+<!-- Шаг 4 -->
+<div class="practice-step">
+  <div class="practice-step-number">4</div>
+  <div class="practice-step-title">Метод анализа разных типов запросов</div>
+  <pre><code class="language-python">def analyze_by_query_type(self):
+    """Анализ качества поиска для разных типов запросов"""
+    
+    # Русскоязычные запросы разных типов
+    test_queries = {
+        "прямой запрос": "искусственный интеллект",
+        "развёрнутый запрос": "как работает машинное обучение",
+        "запрос с синонимами": "нейросети и глубокое обучение",
+        "запрос с аббревиатурой": "что такое ML",
+        "запрос на разговорном": "как обучить модель"
+    }
+    
+    print("Анализ качества семантического поиска (русский язык)")
+    print("=" * 60)
+    
+    for query_type, query in test_queries.items():
+        print(f"\nТип: {query_type}")
+        print(f"Запрос: '{query}'")
+        
+        results = self.vector_store.search(query, n_results=3)
+        
+        for i, r in enumerate(results):
+            # distance в Chroma: 0 = идеально, больше = хуже
+            similarity = 1 - r['distance']
+            print(f"  {i+1}. Сходство: {similarity:.3f} - {r['source']}")
+            print(f"     {r['text'][:80]}...")
+    
+    return results</code></pre>
+  <p><em>Определяются пять типов русскоязычных запросов (прямой, развёрнутый, с синонимами, с аббревиатурой, разговорный). Для каждого выполняется поиск, расстояние преобразуется в сходство, и выводятся топ-3 результата с указанием источника и фрагмента текста.</em></p>
+</div>
+
+<!-- Шаг 5 -->
+<div class="practice-step">
+  <div class="practice-step-number">5</div>
+  <div class="practice-step-title">Главная функция запуска</div>
+  <pre><code class="language-python">def main():
+    # Инициализация
+    vector_store = ChromaVectorStore(
+        persist_directory="../data/chroma_db",
+        collection_name="rag_documents"
+    )
+    
+    analyzer = SearchAnalyzer(vector_store)
+    analyzer.analyze_by_query_type()
+
+if __name__ == "__main__":
+    main()</code></pre>
+  <p><em>Создаётся подключение к векторной базе данных, инициализируется анализатор и запускается анализ качества поиска по всем типам запросов. Блок if __name__ == "__main__" обеспечивает выполнение скрипта при прямом запуске.</em></p>
+  <img src="../images/image30.png" alt="Код анализатора поиска">
+</div>
+
+<!-- Шаг 6 -->
+<div class="practice-step">
+  <div class="practice-step-number">6</div>
+  <div class="practice-step-title">Запуск анализатора</div>
+  <div class="powershell-block copyable"><div class="powershell-block__bar"><span>PowerShell</span><button type="button" class="btn-copy">Копировать</button></div><pre><code>cd scripts
+python analyze_search.py</code></pre></div>
+  <img src="../images/image31.png" alt="Результаты анализа поиска">
+</div>
+
+<!-- Шаг 7 -->
+<div class="practice-step">
+  <div class="practice-step-number">7</div>
+  <div class="practice-step-title">Сравнение русскоязычных моделей эмбеддингов</div>
+  <p>Создайте файл <span class="file-link">scripts/compare_embeddings.py</span>. Импортируйте библиотеки и отключение интернета:</p>
+  <pre><code class="language-python"># scripts/compare_embeddings.py
+import os
+import time
+import numpy as np
+from sentence_transformers import SentenceTransformer
+
+# Отключаем интернет-проверки (для уже скачанных моделей)
+os.environ["TRANSFORMERS_OFFLINE"] = "1"
+os.environ["HF_HUB_OFFLINE"] = "1"</code></pre>
+  <p><em>Импортируются библиотеки и отключаются попытки подключения к интернету.</em></p>
+</div>
+
+<!-- Шаг 8 -->
+<div class="practice-step">
+  <div class="practice-step-number">8</div>
+  <div class="practice-step-title">Функция сравнения моделей из локальных папок</div>
+  <pre><code class="language-python">def compare_russian_models(texts):
+    """Сравнение русскоязычных моделей эмбеддингов из локальных папок"""
+    
+    # Прямые пути к уже скачанным моделям
+    models_to_test = {
+        "C:\\Users\\%USERNAME%\\.cache\\huggingface\\hub\\models--cointegrated--rubert-tiny2\\snapshots\\e8ed3b0c8bbf4fb6984c3de043bf7d2f4e5969ae": "rubert-tiny2 (312 dim)",
+        "C:\\Users\\%USERNAME%\\.cache\\huggingface\\hub\\models--sergeyzh--rubert-tiny-turbo\\snapshots\\main": "rubert-tiny-turbo (312 dim) - если скачана"
+    }
+    
+    results = {}
+    
+    for model_path, description in models_to_test.items():
+        # Проверяем, существует ли папка с моделью
+        if not os.path.exists(model_path):
+            print(f"\nМодель не найдена по пути: {model_path}")
+            print(f"  Пропускаем: {description}")
+            continue
+            
+        print(f"\nТестирование модели: {description}")
+        print(f"Путь: {model_path}")
+        
+        try:
+            start_load = time.time()
+            model = SentenceTransformer(model_path)  # загрузка из локальной папки
+            load_time = time.time() - start_load
+            
+            start_encode = time.time()
+            embeddings = model.encode(texts, show_progress_bar=True)
+            encode_time = time.time() - start_encode
+            
+            results[model_path] = {
+                'name': description,
+                'dimension': embeddings.shape[1],
+                'load_time': load_time,
+                'encode_time': encode_time,
+                'embedding_shape': embeddings.shape
+            }
+            
+            print(f"  Размерность: {embeddings.shape[1]}")
+            print(f"  Время загрузки: {load_time:.2f} сек")
+            print(f"  Время кодирования: {encode_time:.2f} сек")
+            print(f"  Пример эмбеддинга (первые 5): {embeddings[0][:5]}")
+            
+        except Exception as e:
+            print(f"  Ошибка при загрузке: {e}")
+            results[model_path] = {'error': str(e)}
+    
+    return results</code></pre>
+  <p><em>Определяются прямые пути к папкам с уже скачанными моделями. Перед загрузкой проверяется существование папки. Если модель не найдена - она пропускается.</em></p>
+</div>
+
+<!-- Шаг 9 -->
+<div class="practice-step">
+  <div class="practice-step-number">9</div>
+  <div class="practice-step-title">Главная функция и тестовые данные</div>
+  <pre><code class="language-python">def main():
+    # Русскоязычные тестовые тексты
+    test_texts = [
+        "Искусственный интеллект - это область компьютерных наук.",
+        "Машинное обучение - это подраздел искусственного интеллекта.",
+        "Нейронные сети вдохновлены структурой человеческого мозга."
+    ] * 5
+    
+    print("Сравнение русскоязычных моделей эмбеддингов")
+    print("=" * 60)
+    print(f"Количество тестовых текстов: {len(test_texts)}")
+    
+    results = compare_russian_models(test_texts)</code></pre>
+  <p><em>Создаются тестовые тексты и запускается функция сравнения.</em></p>
+</div>
+
+<!-- Шаг 10 -->
+<div class="practice-step">
+  <div class="practice-step-number">10</div>
+  <div class="practice-step-title">Вывод результатов и запуск</div>
+  <pre><code class="language-python">    print("\n" + "=" * 60)
+    print("Сводная таблица:")
+    print("-" * 60)
+    for path, metrics in results.items():
+        if 'error' not in metrics:
+            print(f"\nМодель: {metrics['name']}")
+            print(f"  Размерность: {metrics['dimension']}")
+            print(f"  Время загрузки: {metrics['load_time']:.2f} сек")
+            print(f"  Время кодирования: {metrics['encode_time']:.2f} сек")
+
+if __name__ == "__main__":
+    main()</code></pre>
+  <p><em>Выводится сводная таблица с результатами сравнения для всех найденных моделей.</em></p>
+  <p><strong>Ручная установка модели sergeyzh/rubert-tiny-turbo</strong></p>
+  <p>Если модель не скачивается автоматически, скачайте файлы вручную по ссылкам и положите в папку:</p>
+  <pre>C:\Users\%USERNAME%\.cache\huggingface\hub\models--sergeyzh--rubert-tiny-turbo\snapshots\main\</pre>
+  <img src="../images/image32.png" alt="Сравнение моделей эмбеддингов">
+</div>
+
+<!-- Шаг 11 -->
+<div class="practice-step">
+  <div class="practice-step-number">11</div>
+  <div class="practice-step-title">Запуск сравнения моделей</div>
+  <div class="powershell-block copyable"><div class="powershell-block__bar"><span>PowerShell</span><button type="button" class="btn-copy">Копировать</button></div><pre><code>python compare_embeddings.py</code></pre></div>
+</div>
+
+<!-- Шаг 12 -->
+<div class="practice-step">
+  <div class="practice-step-number">12</div>
+  <div class="practice-step-title">Тестирование поиска на русских запросах</div>
+  <p>Создайте файл <span class="file-link">scripts/test_russian_search.py</span>. Импортируйте библиотеки:</p>
+  <pre><code class="language-python"># scripts/test_russian_search.py
+from chroma_manager import ChromaVectorStore
+from sentence_transformers import SentenceTransformer</code></pre>
+  <p><em>Импортируются класс для работы с векторной базой данных и библиотека для работы с моделями эмбеддингов.</em></p>
+</div>
+
+<!-- Шаг 13 -->
+<div class="practice-step">
+  <div class="practice-step-number">13</div>
+  <div class="practice-step-title">Определение функции тестирования и инициализация</div>
+  <pre><code class="language-python">def test_russian_search():
+    """Тестирование семантического поиска на русских запросах"""
+    
+    # Инициализация
+    vector_store = ChromaVectorStore(
+        persist_directory="../data/chroma_db",
+        collection_name="rag_documents"
+    )
+    
+    # Загрузка русскоязычной модели
+    model = SentenceTransformer('cointegrated/rubert-tiny2')</code></pre>
+  <p><em>Создаётся функция test_russian_search(), внутри неё подключается векторная база данных и загружается русскоязычная модель эмбеддингов.</em></p>
+</div>
+
+<!-- Шаг 14 -->
+<div class="practice-step">
+  <div class="practice-step-number">14</div>
+  <div class="practice-step-title">Создание списка тестовых запросов</div>
+  <pre><code class="language-python">    # Реальные русские запросы
+    test_queries = [
+        "Что такое искусственный интеллект простыми словами?",
+        "Чем отличается машинное обучение от обычного программирования?",
+        "Как работают нейронные сети?",
+        "Зачем нужны векторные базы данных?"
+    ]
+    
+    print("Тестирование семантического поиска на русском языке")
+    print("=" * 60)</code></pre>
+  <p><em>Определяется список из четырёх русскоязычных поисковых запросов и выводится заголовок тестирования.</em></p>
+</div>
+
+<!-- Шаг 15 -->
+<div class="practice-step">
+  <div class="practice-step-number">15</div>
+  <div class="practice-step-title">Цикл поиска и вывод результатов</div>
+  <pre><code class="language-python">    for query in test_queries:
+        print(f"\nЗапрос: {query}")
+        
+        # Поиск
+        results = vector_store.search(query, n_results=3)
+        
+        for i, r in enumerate(results):
+            similarity = 1 - r['distance']
+            print(f"  {i+1}. [Сходство: {similarity:.3f}] {r['source']}")
+            print(f"     {r['text'][:100]}...")
+        print("-" * 40)
+
+if __name__ == "__main__":
+    test_russian_search()</code></pre>
+  <p><em>Для каждого запроса выполняется поиск в векторной БД, из расстояния вычисляется сходство, и выводятся топ-3 результата с указанием источника и фрагмента текста. Блок if __name__ == "__main__" обеспечивает запуск функции при выполнении скрипта.</em></p>
+  <img src="../images/image33.png" alt="Тестирование русского поиска">
+</div>
+
+<!-- Шаг 16 -->
+<div class="practice-step">
+  <div class="practice-step-number">16</div>
+  <div class="practice-step-title">Запуск тестирования поиска</div>
+  <div class="powershell-block copyable"><div class="powershell-block__bar"><span>PowerShell</span><button type="button" class="btn-copy">Копировать</button></div><pre><code>python test_russian_search.py</code></pre></div>
+</div>
+
+<h2>Задание для самостоятельного выполнения</h2>
+<ul>
+<li>Создайте тестовый набор из 10 вопросов и вручную оцените качество поиска (отметьте, какие результаты релевантны).</li>
+<li>Вычислите метрики Recall@3 и Precision@3 для вашего поиска.</li>
+<li>Сравните две модели эмбеддингов по качеству поиска на ваших тестовых данных.</li>
+<li>Напишите функцию, которая автоматически оценивает среднее косинусное сходство для топ-3 результатов.</li>
+</ul>
+
+<h2>Контрольные вопросы</h2>
+<ol>
+<li>Что такое семантическое пространство и как оно формируется?</li>
+<li>Почему косинусное сходство является основной метрикой для текстов?</li>
+<li>Какие факторы влияют на качество семантического поиска?</li>
+<li>Как интерпретировать значение distance в Chroma?</li>
+<li>В чём разница между полнотой (recall) и точностью (precision) поиска?</li>
+</ol>
+
+<h2>Критерии оценки</h2>
+<div class="criteria-table-wrap">
+  <table class="criteria-table">
+    <thead><tr><th>Критерий</th><th>Баллы</th></tr></thead>
+    <tbody>
+      <tr><td style="padding: 0.75rem 1rem;">Реализация анализатора качества поиска</td><td style="text-align: center;">2</td></tr>
+      <tr><td style="padding: 0.75rem 1rem;">Тестирование разных параметров поиска</td><td style="text-align: center;">2</td></tr>
+      <tr><td style="padding: 0.75rem 1rem;">Сравнение моделей эмбеддингов</td><td style="text-align: center;">2</td></tr>
+      <tr><td style="padding: 0.75rem 1rem;">Анализ проблемных запросов</td><td style="text-align: center;">2</td></tr>
+      <tr><td style="padding: 0.75rem 1rem;">Выполнено дополнительное задание</td><td style="text-align: center;">2</td></tr>
+    </tbody>
+   </table>
+</div>
+<p><strong>Максимальный балл: 10</strong></p>
+</section>
+
+<nav class="nav-prev-next"><a href="practice4.html">← Практика 4</a><a href="practice6.html">Практика 6 →</a></nav>
+</main>
+<footer class="site-footer">Практика 5</footer>
+<script src="../js/main.js"></script>
+</body>
+</html>

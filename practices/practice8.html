@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Практика 8 — Создание веб-интерфейса на Streamlit</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/style.css">
+<style>
+  .content-block img:not(.img-grid-item) {
+    display: block;
+    max-width: 100%;
+    height: auto;
+    margin: 1.5rem auto;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  }
+  .image-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    justify-content: center;
+    margin: 1.5rem 0;
+  }
+  .image-grid figure {
+    flex: 1 1 250px;
+    margin: 0;
+    text-align: center;
+  }
+  .image-grid img {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  }
+  .image-grid figcaption {
+    font-size: 0.85rem;
+    color: #555;
+    margin-top: 0.5rem;
+  }
+  .criteria-table-wrap {
+    overflow-x: auto;
+    margin: 1.5rem 0;
+  }
+  .criteria-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: transparent;
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  .criteria-table th,
+  .criteria-table td {
+    padding: 0.75rem 1rem;
+    text-align: left;
+    border-bottom: 1px solid #e2e8f0;
+  }
+  .criteria-table th {
+    background: transparent;
+    color: #1e3a5f;
+    font-weight: 600;
+    border-bottom: 2px solid #cbd5e1;
+  }
+  .criteria-table tr:last-child td {
+    border-bottom: none;
+  }
+  .practice-step {
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #e2e8f0;
+  }
+  .practice-step:last-child {
+    border-bottom: none;
+  }
+  .practice-step-number {
+    display: inline-block;
+    background: #1e3a5f;
+    color: white;
+    font-weight: 700;
+    font-size: 0.85rem;
+    padding: 0.2rem 0.6rem;
+    border-radius: 20px;
+    margin-right: 0.75rem;
+  }
+  .practice-step-title {
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin: 1rem 0 0.5rem 0;
+  }
+  .file-link {
+    background: #f0f4f8;
+    padding: 0.2rem 0.4rem;
+    border-radius: 6px;
+    font-family: monospace;
+    font-size: 0.9rem;
+  }
+  .question-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1rem 0;
+  }
+  .question-table th,
+  .question-table td {
+    padding: 0.5rem;
+    text-align: left;
+    border-bottom: 1px solid #e2e8f0;
+  }
+  .question-table th {
+    background: transparent;
+    color: #1e3a5f;
+    font-weight: 600;
+    border-bottom: 2px solid #cbd5e1;
+  }
+  
+  /* Кнопка перехода к лекции */
+  .btn-lecture {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: #1e3a5f;
+    color: white !important;
+    padding: 0.75rem 1.5rem;
+    border-radius: 40px;
+    text-decoration: none;
+    font-weight: 600;
+    margin: 1rem 0 1.5rem;
+    transition: background 0.2s;
+  }
+  .btn-lecture:hover {
+    background: #2c5282;
+  }
+</style>
+</head>
+<body>
+<header class="site-header"><div class="header-inner">
+<a class="logo" href="../index.html">RAG <span>курс</span></a>
+<nav class="nav-desktop">
+<a href="../index.html">Главная</a>
+<a href="../lectures/lecture8.html">Лекции</a>
+<a href="practice8.html">Практики</a>
+<a href="../tests/test.html">Тест</a>
+</nav>
+<button type="button" class="menu-toggle" aria-expanded="false" aria-label="Меню">Меню</button>
+</div>
+<nav class="nav-mobile">
+<a href="../index.html">Главная</a>
+<a href="../lectures/lecture8.html">Лекции</a>
+<a href="practice8.html">Практики</a>
+<a href="../tests/test.html">Тест</a>
+</nav>
+</header>
+<main>
+<nav class="breadcrumb"><a href="../index.html">Главная</a> / <a href="practice1.html">Практики</a> / Практика 8</nav>
+<header class="page-header"><h1>Методическое пособие №8. Создание веб-интерфейса на Streamlit</h1></header>
+<div class="practice-goal"><p class="practice-goal__label">Цель занятия</p><p>Собрать все компоненты в готовое Streamlit-приложение для взаимодействия с RAG-системой</p></div>
+<p class="practice-duration"><strong>Продолжительность:</strong> 4 академических часа</p>
+
+<!-- Кнопка перехода к лекции 8 -->
+<div style="text-align: center;">
+  <a href="../lectures/lecture8.html" class="btn-lecture">
+    📖 Перейти к лекции №8
+  </a>
+</div>
+
+<section class="content-block">
+<h2>Пошаговая инструкция</h2>
+
+<p><strong>Теоретическое введение</strong></p>
+<p><strong>Streamlit</strong> - это Python-библиотека для быстрого создания веб-интерфейсов для приложений машинного обучения. Она позволяет:</p>
+<ul>
+<li>Создавать чат-интерфейсы с историей диалога</li>
+<li>Загружать файлы через веб-интерфейс</li>
+<li>Отображать ответы в реальном времени</li>
+<li>Добавлять боковые панели для настроек</li>
+</ul>
+
+<p><strong>Основные компоненты Streamlit:</strong></p>
+<ul>
+<li><code>st.title()</code> - заголовок страницы</li>
+<li><code>st.chat_message()</code> - отображение сообщений в чате</li>
+<li><code>st.chat_input()</code> - поле ввода текста</li>
+<li><code>st.sidebar</code> - боковая панель</li>
+<li><code>st.session_state</code> - хранение состояния между перезагрузками</li>
+<li><code>st.cache_resource</code> - кэширование ресурсоёмких операций</li>
+</ul>
+
+<!-- Шаг 1 -->
+<div class="practice-step">
+  <div class="practice-step-number">1</div>
+  <div class="practice-step-title">Создание основного приложения</div>
+  <p>Создайте файл <span class="file-link">app.py</span> в корневой папке проекта:</p>
+  <pre><code class="language-python"># app.py
+import streamlit as st
+import sys
+import os
+
+# Добавляем путь к скриптам
+sys.path.append(os.path.join(os.path.dirname(__file__), 'scripts'))
+
+from chroma_manager import ChromaVectorStore
+from rag_pipeline import RAGPipeline</code></pre>
+  <p><em>Импортируются библиотеки Streamlit для создания веб-интерфейса, sys и os для работы с путями. Путь к папке scripts добавляется в системный путь, чтобы можно было импортировать модули проекта. Затем импортируются классы для работы с векторной базой данных и RAG-пайплайном.</em></p>
+</div>
+
+<!-- Шаг 2 -->
+<div class="practice-step">
+  <div class="practice-step-number">2</div>
+  <div class="practice-step-title">Настройка страницы Streamlit</div>
+  <pre><code class="language-python"># Настройка страницы
+st.set_page_config(
+    page_title="RAG Чат-бот",
+    page_icon="🤖",
+    layout="wide"
+)
+
+# Заголовок
+st.title("🤖 RAG Чат-бот по документам")
+st.markdown("Задавайте вопросы по загруженным документам")</code></pre>
+  <p><em>Настраивается внешний вид веб-страницы: заголовок вкладки браузера, иконка и широкий макет. Затем отображается главный заголовок приложения и краткое описание.</em></p>
+</div>
+
+<!-- Шаг 3 -->
+<div class="practice-step">
+  <div class="practice-step-number">3</div>
+  <div class="practice-step-title">Инициализация состояния сессии</div>
+  <pre><code class="language-python"># Инициализация сессии
+if "messages" not in st.session_state:
+    st.session_state.messages = []
+
+if "rag_pipeline" not in st.session_state:
+    with st.spinner("Загрузка системы..."):
+        try:
+            vector_store = ChromaVectorStore(
+                persist_directory="./data/chroma_db",
+                collection_name="rag_documents"
+            )
+            st.session_state.rag_pipeline = RAGPipeline(vector_store, use_local=True)
+            st.success("Система загружена!")
+        except Exception as e:
+            st.error(f"Ошибка загрузки: {e}")
+            st.stop()</code></pre>
+  <p><em>Инициализируются переменные состояния сессии Streamlit: messages для хранения истории диалога и rag_pipeline для хранения экземпляра RAG-пайплайна. При первой загрузке страницы отображается индикатор загрузки, создаётся подключение к векторной базе данных, инициализируется RAG-пайплайн.</em></p>
+</div>
+
+<!-- Шаг 4 -->
+<div class="practice-step">
+  <div class="practice-step-number">4</div>
+  <div class="practice-step-title">Создание боковой панели (часть 1 - информация и статус)</div>
+  <pre><code class="language-python"># Боковая панель
+with st.sidebar:
+    st.header("📊 Информация")
+    
+    if st.session_state.rag_pipeline:
+        st.metric("Статус", "Активен")
+        st.metric("Модель", "Qwen2.5 (локальная)")</code></pre>
+  <p><em>В боковой панели создаётся раздел с информацией о системе. Отображаются метрики: статус системы ("Активен") и используемая модель ("Qwen2.5 (локальная)").</em></p>
+</div>
+
+<!-- Шаг 5 -->
+<div class="practice-step">
+  <div class="practice-step-number">5</div>
+  <div class="practice-step-title">Боковая панель - управление документами</div>
+  <pre><code class="language-python">    st.header("📁 Управление")
+    
+    uploaded_files = st.file_uploader(
+        "Загрузить документы",
+        type=["txt", "pdf", "docx"],
+        accept_multiple_files=True
+    )
+    
+    if uploaded_files:
+        st.info(f"Загружено {len(uploaded_files)} файлов")
+    
+    if st.button("🗑️ Очистить историю"):
+        st.session_state.messages = []
+        st.rerun()</code></pre>
+  <p><em>Создаётся виджет для загрузки файлов (поддерживаются форматы txt, pdf, docx). При загрузке файлов выводится информация о количестве загруженных файлов. Добавляется кнопка для очистки истории диалога - при нажатии список сообщений обнуляется и страница перезагружается.</em></p>
+</div>
+
+<!-- Шаг 6 -->
+<div class="practice-step">
+  <div class="practice-step-number">6</div>
+  <div class="practice-step-title">Боковая панель - информация о системе</div>
+  <pre><code class="language-python">    st.header("ℹ️ О системе")
+    st.markdown("""
+    Этот чат-бот использует:
+    - **Поиск**: ChromaDB + семантический поиск
+    - **Генерация**: Qwen2.5 (локально через Ollama)
+    - **Интерфейс**: Streamlit
+    """)</code></pre>
+  <p><em>В боковой панели добавляется раздел с описанием технологий, используемых в чат-боте: поиск на основе ChromaDB и семантического поиска, генерация через локальную модель Qwen2.5 (Ollama), интерфейс на Streamlit.</em></p>
+</div>
+
+<!-- Шаг 7 -->
+<div class="practice-step">
+  <div class="practice-step-number">7</div>
+  <div class="practice-step-title">Отображение истории сообщений</div>
+  <pre><code class="language-python"># Отображение истории сообщений
+for message in st.session_state.messages:
+    with st.chat_message(message["role"]):
+        st.markdown(message["content"])
+        
+        # Показываем источники для ответов ассистента
+        if message["role"] == "assistant" and "sources" in message:
+            with st.expander("📚 Источники"):
+                for source in message["sources"]:
+                    st.caption(f"📄 {source}")</code></pre>
+  <p><em>Перебираются все сообщения в истории диалога. Каждое сообщение отображается в соответствующем стиле (пользователь или ассистент). Для ответов ассистента создаётся раскрывающийся блок "Источники", в котором перечисляются документы, использованные для генерации ответа.</em></p>
+</div>
+
+<!-- Шаг 8 -->
+<div class="practice-step">
+  <div class="practice-step-number">8</div>
+  <div class="practice-step-title">Поле ввода и обработка вопроса пользователя</div>
+  <pre><code class="language-python"># Поле ввода
+if prompt := st.chat_input("Задайте вопрос по документам..."):
+    # Добавление сообщения пользователя
+    st.session_state.messages.append({"role": "user", "content": prompt})
+    with st.chat_message("user"):
+        st.markdown(prompt)</code></pre>
+  <p><em>Создаётся поле для ввода текста. Когда пользователь отправляет вопрос, сообщение добавляется в историю и отображается в интерфейсе.</em></p>
+</div>
+
+<!-- Шаг 9 -->
+<div class="practice-step">
+  <div class="practice-step-number">9</div>
+  <div class="practice-step-title">Генерация и отображение ответа ассистента</div>
+  <pre><code class="language-python">    # Генерация ответа
+    with st.chat_message("assistant"):
+        with st.spinner("Поиск ответа..."):
+            try:
+                result = st.session_state.rag_pipeline.answer_question(prompt)
+                response = result['answer']
+                sources = result['sources']
+                
+                st.markdown(response)
+                
+                with st.expander("📚 Источники"):
+                    for source in sources:
+                        st.caption(f"📄 {source}")
+                
+                # Сохранение ответа
+                st.session_state.messages.append({
+                    "role": "assistant",
+                    "content": response,
+                    "sources": sources
+                })
+            except Exception as e:
+                st.error(f"Ошибка: {e}")</code></pre>
+  <p><em>Показывается индикатор загрузки, вызывается RAG-пайплайн для получения ответа на вопрос. Из результата извлекаются ответ и источники. Ответ отображается в интерфейсе, ниже добавляется раскрывающийся блок с источниками. Ответ сохраняется в историю диалога вместе с источниками.</em></p>
+  <img src="../images/image46.png" alt="Создание приложения Streamlit">
+</div>
+
+<!-- Шаг 10 -->
+<div class="practice-step">
+  <div class="practice-step-number">10</div>
+  <div class="practice-step-title">Запуск приложения через PowerShell</div>
+  <div class="powershell-block copyable"><div class="powershell-block__bar"><span>PowerShell</span><button type="button" class="btn-copy">Копировать</button></div><pre><code>streamlit run app.py</code></pre></div>
+</div>
+
+<!-- Шаг 11 -->
+<div class="practice-step">
+  <div class="practice-step-number">11</div>
+  <div class="practice-step-title">Создание конфигурационного файла</div>
+  <p>Создайте файл <span class="file-link">.streamlit/config.toml</span>:</p>
+  <pre><code># .streamlit/config.toml
+[theme]
+primaryColor = "#1f77b4"
+backgroundColor = "#ffffff"
+secondaryBackgroundColor = "#f0f2f6"
+textColor = "#262730"
+font = "sans serif"
+
+[server]
+maxUploadSize = 100
+enableXsrfProtection = true
+enableCORS = false
+
+[browser]
+gatherUsageStats = false</code></pre>
+</div>
+
+<!-- Шаг 12 -->
+<div class="practice-step">
+  <div class="practice-step-number">12</div>
+  <div class="practice-step-title">Создание скрипта для загрузки документов через интерфейс</div>
+  <p>Добавьте функцию загрузки документов в app.py (в боковую панель):</p>
+  <pre><code class="language-python"># Добавьте в боковую панель после uploaded_files
+if uploaded_files:
+    if st.button("📥 Добавить в базу знаний"):
+        from scripts.load_documents import load_all_documents
+        from scripts.chunk_documents import chunk_documents
+        
+        # Сохранение загруженных файлов
+        saved_files = []
+        for uploaded_file in uploaded_files:
+            file_path = os.path.join("./documents", uploaded_file.name)
+            with open(file_path, "wb") as f:
+                f.write(uploaded_file.getbuffer())
+            saved_files.append(file_path)
+        
+        st.success(f"Сохранено {len(saved_files)} файлов")
+        st.info("Для добавления в базу знаний перезапустите систему")</code></pre>
+</div>
+
+<!-- Шаг 13 -->
+<div class="practice-step">
+  <div class="practice-step-number">13</div>
+  <div class="practice-step-title">Запуск приложения</div>
+  <div class="powershell-block copyable"><div class="powershell-block__bar"><span>PowerShell</span><button type="button" class="btn-copy">Копировать</button></div><pre><code>cd C:\Users\%USERNAME%\Desktop\rag_course
+.\venv\Scripts\activate
+streamlit run app.py</code></pre></div>
+  <p><em>Приложение откроется в браузере по адресу http://localhost:8501.</em></p>
+  <img src="../images/image47.png" alt="Запуск Streamlit приложения">
+</div>
+
+<!-- Шаг 14 -->
+<div class="practice-step">
+  <div class="practice-step-number">14</div>
+  <div class="practice-step-title">Дополнительные улучшения интерфейса - импорт библиотек</div>
+  <p>Создайте расширенную версию <span class="file-link">app_advanced.py</span>:</p>
+  <pre><code class="language-python"># app_advanced.py
+import streamlit as st
+import sys
+import os
+import time
+
+sys.path.append(os.path.join(os.path.dirname(__file__), 'scripts'))
+
+from chroma_manager import ChromaVectorStore
+from rag_pipeline import RAGPipeline</code></pre>
+  <p><em>Импортируются библиотеки Streamlit для веб-интерфейса, sys и os для работы с путями, time для измерения времени ответа.</em></p>
+</div>
+
+<!-- Шаг 15 -->
+<div class="practice-step">
+  <div class="practice-step-number">15</div>
+  <div class="practice-step-title">Настройка страницы и CSS</div>
+  <pre><code class="language-python">st.set_page_config(
+    page_title="RAG Чат-бот",
+    page_icon="🤖",
+    layout="wide",
+    initial_sidebar_state="expanded"
+)
+
+# CSS для улучшения внешнего вида
+st.markdown("""
+<style>
+    .stChatMessage {
+        padding: 1rem;
+        border-radius: 0.5rem;
+        margin-bottom: 1rem;
+    }
+    .stButton button {
+        width: 100%;
+    }
+</style>
+""", unsafe_allow_html=True)</code></pre>
+  <p><em>Настраивается внешний вид страницы: заголовок вкладки, иконка, широкий макет, развёрнутая боковая панель. Добавляются CSS-стили для улучшения отображения сообщений чата и кнопок.</em></p>
+</div>
+
+<!-- Шаг 16 -->
+<div class="practice-step">
+  <div class="practice-step-number">16</div>
+  <div class="practice-step-title">Инициализация состояния сессии с приветствием</div>
+  <pre><code class="language-python"># Инициализация сессии
+if "messages" not in st.session_state:
+    st.session_state.messages = []
+    
+    # Приветственное сообщение
+    st.session_state.messages.append({
+        "role": "assistant",
+        "content": "Здравствуйте! Я RAG-чат-бот. Я могу отвечать на вопросы на основе загруженных документов. Задайте мне вопрос!",
+        "sources": []
+    })</code></pre>
+  <p><em>Инициализируется состояние сессии: создаётся список messages для хранения истории диалога. Добавляется приветственное сообщение от ассистента, которое будет отображаться при первом запуске приложения.</em></p>
+</div>
+
+<!-- Шаг 17 -->
+<div class="practice-step">
+  <div class="practice-step-number">17</div>
+  <div class="practice-step-title">Функция кэширования загрузки системы (с абсолютным путём)</div>
+  <pre><code class="language-python">@st.cache_resource
+def load_system():
+    """Кэширование загрузки системы"""
+    with st.spinner("Загрузка системы..."):
+        # Используем абсолютный путь к базе данных
+        base_dir = os.path.dirname(os.path.abspath(__file__))
+        db_path = os.path.join(base_dir, "data", "chroma_db")
+        
+        vector_store = ChromaVectorStore(
+            persist_directory=db_path,
+            collection_name="rag_documents"
+        )
+        return RAGPipeline(vector_store, use_local=True)</code></pre>
+  <p><em>Создаётся функция load_system, декорированная @st.cache_resource. Это означает, что результат её выполнения будет кэшироваться Streamlit'ом, и при повторных запусках приложения система не будет загружаться заново. Используется абсолютный путь к базе данных.</em></p>
+</div>
+
+<!-- Шаг 18 -->
+<div class="practice-step">
+  <div class="practice-step-number">18</div>
+  <div class="practice-step-title">Главная функция main - заголовок и загрузка системы</div>
+  <pre><code class="language-python">def main():
+    st.title("🤖 RAG Чат-бот по документам")
+    st.caption("Система поиска и генерации ответов на основе ваших документов")
+    
+    # Загрузка системы
+    rag_pipeline = load_system()</code></pre>
+  <p><em>В главной функции отображаются заголовок приложения и подпись. Вызывается функция load_system(), которая возвращает готовый к использованию RAG-пайплайн (с кэшированием).</em></p>
+</div>
+
+<!-- Шаг 19 -->
+<div class="practice-step">
+  <div class="practice-step-number">19</div>
+  <div class="practice-step-title">Боковая панель – настройки</div>
+  <pre><code class="language-python">    # Боковая панель
+    with st.sidebar:
+        st.header("🔧 Настройки")
+        
+        # Настройка количества результатов
+        n_results = st.slider("Количество фрагментов для контекста", 1, 10, 3)
+        
+        st.divider()</code></pre>
+  <p><em>В боковой панели создаётся раздел с настройками. Добавляется ползунок для выбора количества фрагментов, которые будут передаваться в языковую модель как контекст (от 1 до 10, по умолчанию 3).</em></p>
+</div>
+
+<!-- Шаг 20 -->
+<div class="practice-step">
+  <div class="practice-step-number">20</div>
+  <div class="practice-step-title">Боковая панель – статистика</div>
+  <pre><code class="language-python">        # Информация о системе
+        st.header("📊 Статистика")
+        col1, col2 = st.columns(2)
+        with col1:
+            st.metric("Сообщений", len(st.session_state.messages) // 2)
+        with col2:
+            st.metric("Модель", "Qwen2.5")
+        
+        st.divider()</code></pre>
+  <p><em>Создаётся раздел со статистикой. Используются две колонки: в первой отображается количество сообщений в диалоге, во второй — название используемой модели.</em></p>
+</div>
+
+<!-- Шаг 21 -->
+<div class="practice-step">
+  <div class="practice-step-number">21</div>
+  <div class="practice-step-title">Боковая панель – управление</div>
+  <pre><code class="language-python">        # Управление
+        if st.button("🗑️ Очистить историю"):
+            st.session_state.messages = []
+            st.rerun()
+        
+        if st.button("🔄 Перезагрузить систему"):
+            st.cache_resource.clear()
+            st.rerun()</code></pre>
+  <p><em>Добавляются две кнопки управления: "Очистить историю" (обнуляет список сообщений и перезагружает страницу) и "Перезагрузить систему" (очищает кэш и перезагружает страницу, принудительно перезагружая RAG-пайплайн).</em></p>
+</div>
+
+<!-- Шаг 22 -->
+<div class="practice-step">
+  <div class="practice-step-number">22</div>
+  <div class="practice-step-title">Отображение истории сообщений (с текстом фрагментов)</div>
+  <pre><code class="language-python">    # Отображение сообщений
+    for message in st.session_state.messages:
+        with st.chat_message(message["role"]):
+            st.markdown(message["content"])
+            
+            if message["role"] == "assistant" and message.get("sources"):
+                if len(message["sources"]) > 0:
+                    with st.expander("📚 Источники"):
+                        for source in message["sources"]:
+                            st.caption(f"📄 {source}")</code></pre>
+  <p><em>Перебираются все сообщения в истории диалога. Каждое сообщение отображается в соответствующем стиле. Для ответов ассистента создаётся раскрывающийся блок "Источники".</em></p>
+</div>
+
+<!-- Шаг 23 -->
+<div class="practice-step">
+  <div class="practice-step-number">23</div>
+  <div class="practice-step-title">Поле ввода и обработка вопроса</div>
+  <pre><code class="language-python">    # Поле ввода
+    if prompt := st.chat_input("Введите ваш вопрос..."):
+        # Добавление сообщения пользователя
+        st.session_state.messages.append({"role": "user", "content": prompt})
+        with st.chat_message("user"):
+            st.markdown(prompt)
+        
+        # Генерация ответа
+        with st.chat_message("assistant"):
+            with st.spinner("Поиск и генерация ответа..."):
+                start_time = time.time()
+                
+                # Получение ответа
+                result = rag_pipeline.answer_question(prompt)
+                response = result['answer']
+                sources = result['sources']
+                
+                elapsed = time.time() - start_time</code></pre>
+  <p><em>Создаётся поле для ввода текста. Когда пользователь отправляет вопрос, сообщение добавляется в историю и отображается. Затем запускается процесс генерации ответа: засекается время начала, вызывается RAG-пайплайн, вычисляется затраченное время.</em></p>
+</div>
+
+<!-- Шаг 24 -->
+<div class="practice-step">
+  <div class="practice-step-number">24</div>
+  <div class="practice-step-title">Отображение ответа и сохранение в историю</div>
+  <pre><code class="language-python">                st.markdown(response)
+                
+                # Показываем время ответа
+                st.caption(f"⏱️ Время ответа: {elapsed:.2f} секунд")
+                
+                # Отображение источников
+                if sources and len(sources) > 0:
+                    with st.expander("📚 Источники", expanded=True):
+                        for source in sources:
+                            st.markdown(f"- 📄 `{source}`")
+                else:
+                    st.info("📭 Источники не найдены")
+                
+                # Сохранение ответа в историю
+                st.session_state.messages.append({
+                    "role": "assistant",
+                    "content": response,
+                    "sources": sources
+                })</code></pre>
+  <p><em>Отображается ответ ассистента, под ним показывается время, затраченное на генерацию ответа. Добавляется раскрывающийся блок с источниками. Ответ сохраняется в историю диалога вместе с источниками.</em></p>
+</div>
+
+<!-- Шаг 25 -->
+<div class="practice-step">
+  <div class="practice-step-number">25</div>
+  <div class="practice-step-title">Завершение функции main</div>
+  <pre><code class="language-python">if __name__ == "__main__":
+    main()</code></pre>
+  <p><em>Блок if __name__ == "__main__" запускает главную функцию при непосредственном выполнении скрипта.</em></p>
+  <img src="../images/image48.png" alt="Расширенная версия приложения">
+  <img src="../images/image49.png" alt="Запуск расширенной версии">
+</div>
+
+<!-- Шаг 26 -->
+<div class="practice-step">
+  <div class="practice-step-number">26</div>
+  <div class="practice-step-title">Примеры вопросов для тестирования</div>
+  <p>Вопросы, на которые есть ответы в документах:</p>
+  <table class="question-table">
+    <thead><tr><th>№</th><th>Вопрос</th></tr></thead>
+    <tbody>
+      <tr><td style="padding: 0.5rem;">1</td><td style="padding: 0.5rem;">Что такое искусственный интеллект?</td></tr>
+      <tr><td style="padding: 0.5rem;">2</td><td style="padding: 0.5rem;">Что такое машинное обучение?</td></tr>
+      <tr><td style="padding: 0.5rem;">3</td><td style="padding: 0.5rem;">Чем машинное обучение отличается от традиционного программирования?</td></tr>
+      <tr><td style="padding: 0.5rem;">4</td><td style="padding: 0.5rem;">Что такое нейронные сети?</td></tr>
+      <tr><td style="padding: 0.5rem;">5</td><td style="padding: 0.5rem;">Из чего состоят нейронные сети?</td></tr>
+      <tr><td style="padding: 0.5rem;">6</td><td style="padding: 0.5rem;">Чем вдохновлены нейронные сети?</td></tr>
+      <tr><td style="padding: 0.5rem;">7</td><td style="padding: 0.5rem;">Что такое ИИ?</td></tr>
+    </tbody>
+  </table>
+  <img src="../images/image50.png" alt="Работа приложения">
+  <p><em>Проверьте, как работает приложение.</em></p>
+</div>
+
+<h2>Задание для самостоятельного выполнения</h2>
+<ul>
+<li>Добавьте в приложение возможность выбора модели LLM из выпадающего списка.</li>
+<li>Реализуйте отображение времени ответа и количества использованных токенов.</li>
+<li>Добавьте функцию экспорта истории диалога в JSON файл.</li>
+<li>Создайте возможность регулировки температуры (temperature) для управления креативностью ответов.</li>
+</ul>
+
+<h2>Контрольные вопросы</h2>
+<ol>
+<li>Как Streamlit управляет состоянием приложения между обновлениями страницы?</li>
+<li>Что такое st.cache_resource и для чего он используется?</li>
+<li>Как добавить в Streamlit-приложение боковую панель?</li>
+<li>Почему в RAG-чате важно показывать источники информации?</li>
+<li>Как можно улучшить пользовательский опыт в RAG-чате?</li>
+</ol>
+
+<h2>Критерии оценки</h2>
+<div class="criteria-table-wrap">
+  <table class="criteria-table">
+    <thead><tr><th>Критерий</th><th>Баллы</th></tr></thead>
+    <tbody>
+      <tr><td style="padding: 0.75rem 1rem;">Создание базового Streamlit-приложения</td><td style="text-align: center;">2</td>
+      <tr>
+      <tr><td style="padding: 0.75rem 1rem;">Интеграция RAG-пайплайна с интерфейсом</td><td style="text-align: center;">2</td>
+      </tr>
+      <tr><td style="padding: 0.75rem 1rem;">Отображение истории диалога</td><td style="text-align: center;">2</td>
+      </tr>
+      <tr><td style="padding: 0.75rem 1rem;">Добавление боковой панели с настройками</td><td style="text-align: center;">2</td>
+      </tr>
+      <tr><td style="padding: 0.75rem 1rem;">Выполнено дополнительное задание</td><td style="text-align: center;">2</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+<p><strong>Максимальный балл: 10</strong></p>
+</section>
+
+<nav class="nav-prev-next"><a href="practice7.html">← Практика 7</a><span></span></nav>
+</main>
+<footer class="site-footer">Практика 8</footer>
+<script src="../js/main.js"></script>
+</body>
+</html>

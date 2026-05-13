@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Практика 6 — Оценка качества RAG-системы</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/style.css">
+<style>
+  .content-block img:not(.img-grid-item) {
+    display: block;
+    max-width: 100%;
+    height: auto;
+    margin: 1.5rem auto;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  }
+  .image-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    justify-content: center;
+    margin: 1.5rem 0;
+  }
+  .image-grid figure {
+    flex: 1 1 250px;
+    margin: 0;
+    text-align: center;
+  }
+  .image-grid img {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  }
+  .image-grid figcaption {
+    font-size: 0.85rem;
+    color: #555;
+    margin-top: 0.5rem;
+  }
+  .btn-lecture {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: #1e3a5f;
+    color: white !important;
+    padding: 0.75rem 1.5rem;
+    border-radius: 40px;
+    text-decoration: none;
+    font-weight: 600;
+    margin: 1rem 0 2rem;
+    transition: background 0.2s;
+  }
+  .btn-lecture:hover {
+    background: #2c5282;
+  }
+  .criteria-table-wrap {
+    overflow-x: auto;
+    margin: 1.5rem 0;
+  }
+  .criteria-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: transparent;
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  .criteria-table th,
+  .criteria-table td {
+    padding: 0.75rem 1rem;
+    text-align: left;
+    border-bottom: 1px solid #e2e8f0;
+  }
+  .criteria-table th {
+    background: transparent;
+    color: #1e3a5f;
+    font-weight: 600;
+    border-bottom: 2px solid #cbd5e1;
+  }
+  .criteria-table tr:last-child td {
+    border-bottom: none;
+  }
+  .practice-step {
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #e2e8f0;
+  }
+  .practice-step:last-child {
+    border-bottom: none;
+  }
+  .practice-step-number {
+    display: inline-block;
+    background: #1e3a5f;
+    color: white;
+    font-weight: 700;
+    font-size: 0.85rem;
+    padding: 0.2rem 0.6rem;
+    border-radius: 20px;
+    margin-right: 0.75rem;
+  }
+  .practice-step-title {
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin: 1rem 0 0.5rem 0;
+  }
+  .file-link {
+    background: #f0f4f8;
+    padding: 0.2rem 0.4rem;
+    border-radius: 6px;
+    font-family: monospace;
+    font-size: 0.9rem;
+  }
+</style>
+</head>
+<body>
+<header class="site-header"><div class="header-inner">
+<a class="logo" href="../index.html">RAG <span>курс</span></a>
+<nav class="nav-desktop">
+<a href="../index.html">Главная</a>
+<a href="../lectures/lecture7.html">Лекции</a>
+<a href="practice6.html">Практики</a>
+<a href="../tests/test.html">Тест</a>
+</nav>
+<button type="button" class="menu-toggle" aria-expanded="false" aria-label="Меню">Меню</button>
+</div>
+<nav class="nav-mobile">
+<a href="../index.html">Главная</a>
+<a href="../lectures/lecture7.html">Лекции</a>
+<a href="practice6.html">Практики</a>
+<a href="../tests/test.html">Тест</a>
+</nav>
+</header>
+<main>
+<nav class="breadcrumb"><a href="../index.html">Главная</a> / <a href="practice1.html">Практики</a> / Практика 6</nav>
+<header class="page-header"><h1>Методическое пособие №6. Оценка качества RAG-системы</h1></header>
+<div class="practice-goal"><p class="practice-goal__label">Цель занятия</p><p>Научиться оценивать качество RAG-системы с помощью автоматических метрик и тестовых наборов</p></div>
+<p class="practice-duration"><strong>Продолжительность:</strong> 4 академических часа</p>
+
+<div style="text-align: center;">
+  <a href="../lectures/lecture7.html" class="btn-lecture">📖 Перейти к лекции №7</a>
+</div>
+
+<section class="content-block">
+<h2>Пошаговая инструкция</h2>
+
+<p><strong>Теоретическое введение</strong></p>
+<p>Оценка качества RAG-системы включает две группы метрик:</p>
+<ul>
+<li><strong>Метрики поиска</strong> - оценивают, насколько хорошо находятся релевантные документы</li>
+<li><strong>Метрики генерации</strong> - оценивают качество сгенерированных ответов</li>
+</ul>
+
+<p><strong>Основные метрики поиска:</strong></p>
+<ul>
+<li><strong>Recall@k</strong> - доля релевантных документов, попавших в топ-k</li>
+<li><strong>Precision@k</strong> - доля релевантных среди топ-k</li>
+<li><strong>MRR</strong> - средний обратный ранг первого релевантного документа</li>
+</ul>
+
+<!-- Шаг 1 -->
+<div class="practice-step">
+  <div class="practice-step-number">1</div>
+  <div class="practice-step-title">Создание тестового набора</div>
+  <p>Создайте файл <span class="file-link">scripts/create_test_set.py</span>:</p>
+  <pre><code class="language-python"># scripts/create_test_set.py
+import json</code></pre>
+  <p><em>Импортируется библиотека для работы с JSON-файлами, которая позволяет загружать и сохранять данные в формате JSON.</em></p>
+</div>
+
+<!-- Шаг 2 -->
+<div class="practice-step">
+  <div class="practice-step-number">2</div>
+  <div class="practice-step-title">Определение функции создания тестового набора</div>
+  <pre><code class="language-python">def create_test_set(chunks_file, output_file):
+    """Создание тестового набора данных"""
+    
+    # Загрузка фрагментов
+    with open(chunks_file, 'r', encoding='utf-8') as f:
+        chunks = json.load(f)</code></pre>
+  <p><em>Создаётся функция create_test_set, которая принимает путь к файлу с фрагментами и путь для сохранения тестового набора. Внутри функции загружаются фрагменты из JSON-файла.</em></p>
+</div>
+
+<!-- Шаг 3 -->
+<div class="practice-step">
+  <div class="practice-step-number">3</div>
+  <div class="practice-step-title">Создание тестовых вопросов вручную</div>
+  <pre><code class="language-python">    # Вручную создаём тестовые вопросы
+    test_queries = [
+        {
+            "question": "Что такое искусственный интеллект?",
+            "relevant_chunk_ids": [0],
+            "ideal_answer": "Искусственный интеллект - это область компьютерных наук, занимающаяся созданием систем, способных выполнять задачи, требующие человеческого интеллекта."
+        },
+        {
+            "question": "Чем машинное обучение отличается от традиционного программирования?",
+            "relevant_chunk_ids": [1, 2],
+            "ideal_answer": "В традиционном программировании программист пишет правила, а в машинном обучении система сама выявляет закономерности на данных."
+        }
+    ]</code></pre>
+  <p><em>Определяется список тестовых вопросов, каждый из которых содержит текст вопроса, ID релевантных фрагментов (которые должны быть найдены при поиске) и эталонный ответ для оценки качества генерации.</em></p>
+</div>
+
+<!-- Шаг 4 -->
+<div class="practice-step">
+  <div class="practice-step-number">4</div>
+  <div class="practice-step-title">Сохранение тестового набора в файл</div>
+  <pre><code class="language-python">    # Сохранение тестового набора
+    with open(output_file, 'w', encoding='utf-8') as f:
+        json.dump(test_queries, f, ensure_ascii=False, indent=2)
+    
+    print(f"Создан тестовый набор с {len(test_queries)} вопросами")
+    return test_queries</code></pre>
+  <p><em>Тестовый набор сохраняется в JSON-файл с отступами для удобства чтения. Выводится сообщение о количестве созданных вопросов. Функция возвращает созданный тестовый набор.</em></p>
+  <img src="../images/image34.png" alt="Создание тестового набора">
+</div>
+
+<!-- Шаг 5 -->
+<div class="practice-step">
+  <div class="practice-step-number">5</div>
+  <div class="practice-step-title">Заглушка для автоматического создания тестов</div>
+  <pre><code class="language-python">def create_auto_test_set(chunks, num_questions=10):
+    """Автоматическое создание тестового набора с помощью LLM"""
+    pass</code></pre>
+  <p><em>Определяется функция-заглушка для автоматического создания тестового набора с помощью языковой модели. Эта функция может быть реализована позже для более продвинутого сценария.</em></p>
+</div>
+
+<!-- Шаг 6 -->
+<div class="practice-step">
+  <div class="practice-step-number">6</div>
+  <div class="practice-step-title">Запуск скрипта при непосредственном выполнении</div>
+  <pre><code class="language-python">if __name__ == "__main__":
+    chunks = json.load(open("../data/chunks.json", 'r', encoding='utf-8'))
+    create_test_set("../data/chunks.json", "../data/test_set.json")</code></pre>
+  <p><em>Блок проверяет, запущен ли скрипт напрямую. Если да - загружаются фрагменты из файла chunks.json и вызывается функция создания тестового набора, который сохраняется в test_set.json.</em></p>
+  <img src="../images/image35.png" alt="Сохранение тестового набора">
+</div>
+
+<!-- Шаг 7 -->
+<div class="practice-step">
+  <div class="practice-step-number">7</div>
+  <div class="practice-step-title">Реализация оценки поиска</div>
+  <p>Создайте файл <span class="file-link">scripts/evaluate_retrieval.py</span>:</p>
+  <pre><code class="language-python"># scripts/evaluate_retrieval.py
+import json
+import numpy as np
+from chroma_manager import ChromaVectorStore</code></pre>
+  <p><em>Импортируются библиотеки для работы с JSON-файлами, выполнения математических операций с массивами данных, а также класс для работы с векторной базой данных Chroma.</em></p>
+</div>
+
+<!-- Шаг 8 -->
+<div class="practice-step">
+  <div class="practice-step-number">8</div>
+  <div class="practice-step-title">Определение класса RetrievalEvaluator и конструктора</div>
+  <pre><code class="language-python">class RetrievalEvaluator:
+    """Оценка качества поиска"""
+    
+    def __init__(self, vector_store):
+        self.vector_store = vector_store</code></pre>
+  <p><em>Создаётся класс RetrievalEvaluator для оценки качества поиска. В конструкторе сохраняется ссылка на векторное хранилище, которое будет использоваться для выполнения поисковых запросов.</em></p>
+</div>
+
+<!-- Шаг 9 -->
+<div class="practice-step">
+  <div class="practice-step-number">9</div>
+  <div class="practice-step-title">Метод evaluate для оценки качества поиска</div>
+  <pre><code class="language-python">    def evaluate(self, test_set, k=5):
+        """Оценка поиска на тестовом наборе"""
+        
+        recall_scores = []
+        precision_scores = []
+        reciprocal_ranks = []
+        
+        for test_item in test_set:
+            question = test_item['question']
+            relevant_ids = set(test_item['relevant_chunk_ids'])
+            
+            # Поиск
+            results = self.vector_store.search(question, n_results=k)</code></pre>
+  <p><em>Метод evaluate принимает тестовый набор и параметр k (количество результатов). Инициализируются списки для хранения значений метрик. Для каждого тестового вопроса выполняется поиск в векторной БД.</em></p>
+</div>
+
+<!-- Шаг 10 -->
+<div class="practice-step">
+  <div class="practice-step-number">10</div>
+  <div class="practice-step-title">Извлечение ID найденных документов</div>
+  <pre><code class="language-python">            # Получение ID найденных документов
+            retrieved_ids = set()
+            for r in results:
+                chunk_id = r.get('chunk_id')
+                if chunk_id is not None:
+                    retrieved_ids.add(chunk_id)</code></pre>
+  <p><em>Из результатов поиска извлекаются идентификаторы фрагментов (chunk_id) и сохраняются в множество retrieved_ids для дальнейшего сравнения с релевантными ID.</em></p>
+</div>
+
+<!-- Шаг 11 -->
+<div class="practice-step">
+  <div class="practice-step-number">11</div>
+  <div class="practice-step-title">Расчёт метрик Recall@k и Precision@k</div>
+  <pre><code class="language-python">            # Recall@k
+            if len(relevant_ids) > 0:
+                recall = len(retrieved_ids & relevant_ids) / len(relevant_ids)
+                recall_scores.append(recall)
+            
+            # Precision@k
+            precision = len(retrieved_ids & relevant_ids) / k
+            precision_scores.append(precision)</code></pre>
+  <p><em>Вычисляется Recall@k - доля релевантных документов, найденных среди топ-k результатов. Вычисляется Precision@k - доля релевантных документов среди всех топ-k результатов. Результаты добавляются в соответствующие списки.</em></p>
+</div>
+
+<!-- Шаг 12 -->
+<div class="practice-step">
+  <div class="practice-step-number">12</div>
+  <div class="practice-step-title">Расчёт метрики MRR и возврат результатов</div>
+  <pre><code class="language-python">            # MRR (Mean Reciprocal Rank)
+            found = False
+            for i, r in enumerate(results):
+                chunk_id = r.get('chunk_id')
+                if chunk_id is not None and chunk_id in relevant_ids:
+                    reciprocal_ranks.append(1 / (i + 1))
+                    found = True
+                    break
+            if not found:
+                reciprocal_ranks.append(0)
+        
+        return {
+            'Recall@k': np.mean(recall_scores) if recall_scores else 0,
+            'Precision@k': np.mean(precision_scores) if precision_scores else 0,
+            'MRR': np.mean(reciprocal_ranks) if reciprocal_ranks else 0
+        }</code></pre>
+  <p><em>Вычисляется MRR (Mean Reciprocal Rank) - средний обратный ранг первого релевантного документа. Метод возвращает словарь со средними значениями всех трёх метрик.</em></p>
+</div>
+
+<!-- Шаг 13 -->
+<div class="practice-step">
+  <div class="practice-step-number">13</div>
+  <div class="practice-step-title">Определение главной функции main (загрузка тестового набора)</div>
+  <pre><code class="language-python">def main():
+    # Загрузка тестового набора
+    try:
+        with open("../data/test_set.json", 'r', encoding='utf-8') as f:
+            test_set = json.load(f)
+        print(f"Загружен тестовый набор: {len(test_set)} вопросов")
+    except FileNotFoundError:
+        print("Ошибка: файл ../data/test_set.json не найден")
+        print("Сначала выполните: python create_test_set.py")
+        return</code></pre>
+  <p><em>В главной функции выполняется загрузка тестового набора из JSON-файла. Если файл не найден, выводится сообщение об ошибке с инструкцией по созданию тестового набора.</em></p>
+</div>
+
+<!-- Шаг 14 -->
+<div class="practice-step">
+  <div class="practice-step-number">14</div>
+  <div class="practice-step-title">Инициализация векторной БД и оценка качества</div>
+  <pre><code class="language-python">    # Инициализация
+    vector_store = ChromaVectorStore(
+        persist_directory="../data/chroma_db",
+        collection_name="rag_documents"
+    )
+    
+    evaluator = RetrievalEvaluator(vector_store)
+    
+    # Оценка
+    metrics = evaluator.evaluate(test_set, k=5)
+    
+    print("\nОценка качества поиска")
+    print("="*40)
+    for metric, value in metrics.items():
+        print(f"{metric}: {value:.4f}")
+
+if __name__ == "__main__":
+    main()</code></pre>
+  <p><em>Создаётся подключение к векторной базе данных, инициализируется объект RetrievalEvaluator, выполняется оценка качества поиска с параметром k=5. Выводятся результаты всех метрик. Блок if __name__ == "__main__" обеспечивает запуск главной функции.</em></p>
+  <img src="../images/image36.png" alt="Оценка качества поиска">
+  <img src="../images/image37.png" alt="Результаты оценки поиска">
+</div>
+
+<!-- Шаг 15 -->
+<div class="practice-step">
+  <div class="practice-step-number">15</div>
+  <div class="practice-step-title">Оценка качества генерации</div>
+  <p>Создайте файл <span class="file-link">scripts/evaluate_generation.py</span>:</p>
+  <pre><code class="language-python"># scripts/evaluate_generation.py
+import json
+from chroma_manager import ChromaVectorStore
+from rag_pipeline import RAGPipeline</code></pre>
+  <p><em>Импортируются библиотека для работы с JSON-файлами, класс для работы с векторной базой данных Chroma и класс RAGPipeline для выполнения поиска и генерации ответов.</em></p>
+</div>
+
+<!-- Шаг 16 -->
+<div class="practice-step">
+  <div class="practice-step-number">16</div>
+  <div class="practice-step-title">Определение класса GenerationEvaluator и конструктора</div>
+  <pre><code class="language-python">class GenerationEvaluator:
+    """Оценка качества генерации ответов"""
+    
+    def __init__(self, rag_pipeline):
+        self.rag_pipeline = rag_pipeline</code></pre>
+  <p><em>Создаётся класс GenerationEvaluator для оценки качества генерации ответов RAG-системы. В конструкторе сохраняется ссылка на RAG-пайплайн, который будет использоваться для получения ответов на вопросы.</em></p>
+</div>
+
+<!-- Шаг 17 -->
+<div class="practice-step">
+  <div class="practice-step-number">17</div>
+  <div class="practice-step-title">Метод evaluate для оценки генерации</div>
+  <pre><code class="language-python">    def evaluate(self, test_set):
+        """Оценка качества генерации"""
+        results = []
+        
+        for test_item in test_set:
+            question = test_item['question']
+            ideal_answer = test_item['ideal_answer']
+            
+            response = self.rag_pipeline.answer_question(question)
+            generated_answer = response['answer']
+            
+            evaluation = {
+                'question': question,
+                'generated': generated_answer,
+                'ideal': ideal_answer,
+                'has_answer': len(generated_answer) > 0
+            }
+            
+            results.append(evaluation)
+        
+        return results</code></pre>
+  <p><em>Метод evaluate принимает тестовый набор данных. Для каждого тестового вопроса вызывается RAG-пайплайн для получения ответа. Создаётся словарь с вопросом, сгенерированным ответом, эталонным ответом и флагом наличия ответа.</em></p>
+</div>
+
+<!-- Шаг 18 -->
+<div class="practice-step">
+  <div class="practice-step-number">18</div>
+  <div class="practice-step-title">Метод calculate_simple_metrics</div>
+  <pre><code class="language-python">    def calculate_simple_metrics(self, results):
+        """Расчёт простых метрик"""
+        total = len(results)
+        has_answer_count = sum(1 for r in results if r['has_answer'])
+        
+        return {
+            'response_rate': has_answer_count / total if total > 0 else 0
+        }</code></pre>
+  <p><em>Метод calculate_simple_metrics вычисляет простые метрики на основе результатов оценки. Рассчитывается response_rate - доля вопросов, получивших ответ.</em></p>
+</div>
+
+<!-- Шаг 19 -->
+<div class="practice-step">
+  <div class="practice-step-number">19</div>
+  <div class="practice-step-title">Определение главной функции main (часть 1)</div>
+  <pre><code class="language-python">def main():
+    # Загрузка тестового набора
+    try:
+        with open("../data/test_set.json", 'r', encoding='utf-8') as f:
+            test_set = json.load(f)
+        print(f"Загружен тестовый набор: {len(test_set)} вопросов")
+    except FileNotFoundError:
+        print("Ошибка: файл ../data/test_set.json не найден")
+        print("Сначала выполните: python create_test_set.py")
+        return</code></pre>
+  <p><em>В главной функции выполняется загрузка тестового набора из JSON-файла. Если файл не найден, выводится сообщение об ошибке с инструкцией.</em></p>
+</div>
+
+<!-- Шаг 20 -->
+<div class="practice-step">
+  <div class="practice-step-number">20</div>
+  <div class="practice-step-title">Инициализация компонентов и оценка качества</div>
+  <pre><code class="language-python">    # Инициализация
+    vector_store = ChromaVectorStore(
+        persist_directory="../data/chroma_db",
+        collection_name="rag_documents"
+    )
+    
+    rag = RAGPipeline(vector_store, use_local=True, model_name="qwen2.5:3b")
+    evaluator = GenerationEvaluator(rag)
+    
+    # Оценка
+    results = evaluator.evaluate(test_set)
+    metrics = evaluator.calculate_simple_metrics(results)
+    
+    print("\nОценка качества генерации")
+    print("="*40)
+    for metric, value in metrics.items():
+        print(f"{metric}: {value:.4f}")
+
+if __name__ == "__main__":
+    main()</code></pre>
+  <p><em>Создаётся подключение к векторной базе данных, инициализируется RAG-пайплайн с локальной моделью qwen2.5:3b, создаётся объект GenerationEvaluator. Выполняется оценка качества генерации, вычисляются метрики, и результаты выводятся на экран.</em></p>
+  <img src="../images/image38.png" alt="Оценка качества генерации">
+  <img src="../images/image39.png" alt="Результаты оценки генерации">
+</div>
+
+<h2>Задание для самостоятельного выполнения</h2>
+<ul>
+<li>Расширьте тестовый набор до 15-20 вопросов, размеченных вручную.</li>
+<li>Реализуйте метрику ROUGE-1 для оценки сходства сгенерированного ответа с эталонным.</li>
+<li>Проведите сравнение двух версий RAG-системы (например, с разными моделями эмбеддингов).</li>
+<li>Создайте отчёт в формате JSON со всеми метриками для каждой версии системы.</li>
+</ul>
+
+<h2>Контрольные вопросы</h2>
+<ol>
+<li>Почему Recall@k важнее Precision@k для RAG-систем?</li>
+<li>Что такое MRR и как он интерпретируется?</li>
+<li>Какие сложности возникают при оценке качества генерации?</li>
+<li>Зачем нужен тестовый набор данных?</li>
+<li>Как можно автоматизировать создание тестового набора?</li>
+</ol>
+
+<h2>Критерии оценки</h2>
+<div class="criteria-table-wrap">
+  <table class="criteria-table">
+    <thead><tr><th>Критерий</th><th>Баллы</th></tr></thead>
+    <tbody>
+      <tr><td style="padding: 0.75rem 1rem;">Создание тестового набора данных</td><td style="text-align: center;">2</td></tr>
+      <tr><td style="padding: 0.75rem 1rem;">Реализация оценки качества поиска</td><td style="text-align: center;">2</td></tr>
+      <tr><td style="padding: 0.75rem 1rem;">Расчёт метрик (Recall, Precision, MRR)</td><td style="text-align: center;">2</td></tr>
+      <tr><td style="padding: 0.75rem 1rem;">Оценка качества генерации</td><td style="text-align: center;">2</td></tr>
+      <tr><td style="padding: 0.75rem 1rem;">Выполнено дополнительное задание</td><td style="text-align: center;">2</td></tr>
+    </tbody>
+  </table>
+</div>
+<p><strong>Максимальный балл: 10</strong></p>
+</section>
+
+<nav class="nav-prev-next"><a href="practice5.html">← Практика 5</a><a href="practice7.html">Практика 7 →</a></nav>
+</main>
+<footer class="site-footer">Практика 6</footer>
+<script src="../js/main.js"></script>
+</body>
+</html>

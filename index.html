@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Разработка RAG-систем — онлайн-курс</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    /* Дополнительные стили для улучшения внешнего вида главной страницы */
+    .hero {
+      text-align: center;
+      padding: 2.5rem 0 2rem;
+    }
+
+    .hero-badge {
+      display: inline-block;
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--accent, #3b82f6);
+      background: rgba(59, 130, 246, 0.1);
+      padding: 0.25rem 0.75rem;
+      border-radius: 20px;
+      margin-bottom: 1rem;
+    }
+
+    .hero h1 {
+      margin: 0 0 1rem;
+      font-size: clamp(2rem, 6vw, 3rem);
+      font-weight: 800;
+      letter-spacing: -0.02em;
+    }
+
+    .hero-description {
+      max-width: 38rem;
+      margin: 0 auto;
+      color: var(--muted, #6b7280);
+      font-size: 1.1rem;
+      line-height: 1.5;
+    }
+
+    .hero-image {
+      margin: 2rem auto 1.5rem;
+      max-width: 100%;
+      text-align: center;
+    }
+
+    .hero-image img {
+      max-width: 100%;
+      height: auto;
+      border-radius: 16px;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .hero-image img:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 12px 35px rgba(0,0,0,0.15);
+    }
+
+    .button-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      justify-content: center;
+      margin-top: 2rem;
+    }
+
+    .btn {
+      display: inline-block;
+      padding: 0.7rem 1.6rem;
+      border-radius: 40px;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all 0.2s ease;
+    }
+
+    .btn-primary {
+      background: var(--accent, #3b82f6);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: var(--accent-dark, #2563eb);
+      transform: translateY(-2px);
+    }
+
+    .btn-secondary {
+      background: var(--bg-card, #f3f4f6);
+      color: var(--text, #1f2937);
+      border: 1px solid var(--border, #e5e7eb);
+    }
+
+    .btn-secondary:hover {
+      background: var(--border, #e5e7eb);
+      transform: translateY(-2px);
+    }
+
+    .section-title {
+      font-size: 1.6rem;
+      font-weight: 700;
+      margin: 2rem 0 1.25rem 0;
+      letter-spacing: -0.01em;
+    }
+
+    .about-card {
+      background: var(--bg-card, #f9fafb);
+      border: 1px solid var(--border, #e5e7eb);
+      border-radius: 20px;
+      padding: 1.5rem 2rem;
+      margin: 0.5rem 0 1.5rem 0;
+    }
+
+    .program-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1.5rem;
+      margin: 1rem 0 1.5rem 0;
+    }
+
+    .program-card {
+      background: var(--bg-card, #f9fafb);
+      border: 1px solid var(--border, #e5e7eb);
+      border-radius: 20px;
+      overflow: hidden;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .program-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+    }
+
+    .program-card-header {
+      padding: 1.1rem 1.5rem;
+      border-bottom: 1px solid var(--border, #e5e7eb);
+    }
+
+    .program-card-header h3 {
+      margin: 0;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--accent, #3b82f6);
+    }
+
+    .program-list {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+
+    .program-list li {
+      padding: 0.7rem 1.5rem;
+      border-bottom: 1px solid var(--border, #e5e7eb);
+      transition: background 0.15s ease;
+    }
+
+    .program-list li:last-child {
+      border-bottom: none;
+    }
+
+    .program-list li:hover {
+      background: rgba(59, 130, 246, 0.03);
+    }
+
+    .program-list a {
+      text-decoration: none;
+      color: var(--text, #1f2937);
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .program-list a:hover {
+      color: var(--accent, #3b82f6);
+    }
+
+    .lesson-number {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 24px;
+      height: 24px;
+      background: var(--border, #e5e7eb);
+      border-radius: 8px;
+      font-size: 0.7rem;
+      font-weight: 700;
+      color: var(--muted, #6b7280);
+    }
+
+    .cta-block {
+      background: linear-gradient(135deg, #1e3a5f 0%, #0f2b44 100%);
+      border-radius: 24px;
+      padding: 2rem;
+      text-align: center;
+      margin: 2rem 0 1rem 0;
+    }
+
+    .cta-block h3 {
+      margin: 0 0 0.75rem;
+      font-size: 1.4rem;
+      color: white;
+    }
+
+    .cta-block p {
+      margin: 0 0 1.5rem;
+      opacity: 0.85;
+      color: white;
+      max-width: 30rem;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .btn-light {
+      background: white;
+      color: #1e3a5f;
+      padding: 0.7rem 1.8rem;
+      border-radius: 40px;
+      font-weight: 600;
+      text-decoration: none;
+      display: inline-block;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .btn-light:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+
+    @media (max-width: 640px) {
+      .program-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+      }
+      .about-card {
+        padding: 1.25rem;
+      }
+      .cta-block {
+        padding: 1.5rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <div class="header-inner">
+      <a class="logo" href="index.html">RAG <span>курс</span></a>
+      <nav class="nav-desktop">
+        <a href="index.html">Главная</a>
+        <a href="lectures/lecture1.html">Лекции</a>
+        <a href="practices/practice1.html">Практики</a>
+        <a href="tests/test.html">Тест</a>
+      </nav>
+      <button type="button" class="menu-toggle" aria-expanded="false" aria-label="Меню">Меню</button>
+    </div>
+    <nav class="nav-mobile">
+      <a href="index.html">Главная</a>
+      <a href="lectures/lecture1.html">Лекции</a>
+      <a href="practices/practice1.html">Практики</a>
+      <a href="tests/test.html">Тест</a>
+    </nav>
+  </header>
+
+  <main>
+    <div class="wrap" style="max-width: 1000px; margin: 0 auto; padding: 1.5rem 1.5rem 3rem;">
+      
+      <!-- Герой-секция -->
+      <div class="hero">
+        <span class="hero-badge">Онлайн-курс</span>
+        <h1>Разработка RAG-систем</h1>
+        <p class="hero-description">
+          Практический курс по RAG: от теории к созданию полноценной системы поиска и генерации ответов на основе документов.
+        </p>
+        
+        <!-- Картинка по центру -->
+        <div class="hero-image">
+          <img src="images/rag.png" alt="RAG — Retrieval-Augmented Generation" onerror="this.src='https://placehold.co/800x400/1e3a5f/white?text=RAG+Architecture'">
+        </div>
+        
+        <div class="button-group">
+          <a class="btn btn-primary" href="lectures/lecture1.html">Начать обучение</a>
+          <a class="btn btn-secondary" href="practices/practice1.html">Практика 1</a>
+          <a class="btn btn-secondary" href="tests/test.html">Итоговый тест</a>
+        </div>
+      </div>
+
+      <!-- О курсе -->
+      <section>
+        <h2 class="section-title">О курсе</h2>
+        <div class="about-card">
+          <p style="margin: 0; color: var(--muted, #4b5563); font-size: 1rem; line-height: 1.55;">
+            Курс состоит из 8 лекций и 8 практических работ. Вы изучите основы искусственного интеллекта, 
+            принципы работы RAG-систем, научитесь работать с эмбеддингами, векторными базами данных, 
+            интегрировать языковые модели и оценивать качество системы. Финальная практика — создание 
+            полноценного веб-приложения на Streamlit.
+          </p>
+        </div>
+      </section>
+
+      <!-- Программа: две карточки рядом -->
+      <section>
+        <h2 class="section-title">Программа курса</h2>
+        <div class="program-grid">
+          <!-- Карточка лекций -->
+          <div class="program-card">
+            <div class="program-card-header">
+              <h3>Лекции</h3>
+            </div>
+            <ul class="program-list">
+              <li><a href="lectures/lecture1.html"><span class="lesson-number">1</span> Основы искусственного интеллекта, NLP и RAG</a></li>
+              <li><a href="lectures/lecture2.html"><span class="lesson-number">2</span> Архитектура RAG-системы</a></li>
+              <li><a href="lectures/lecture3.html"><span class="lesson-number">3</span> Векторные представления текста (эмбеддинги)</a></li>
+              <li><a href="lectures/lecture4.html"><span class="lesson-number">4</span> Векторные базы данных</a></li>
+              <li><a href="lectures/lecture5.html"><span class="lesson-number">5</span> Интеграция с языковыми моделями</a></li>
+              <li><a href="lectures/lecture6.html"><span class="lesson-number">6</span> Семантический поиск в RAG-системах</a></li>
+              <li><a href="lectures/lecture7.html"><span class="lesson-number">7</span> Оценка качества RAG-систем</a></li>
+              <li><a href="lectures/lecture8.html"><span class="lesson-number">8</span> Оптимизация производительности</a></li>
+            </ul>
+          </div>
+
+          <!-- Карточка практик -->
+          <div class="program-card">
+            <div class="program-card-header">
+              <h3>Практики</h3>
+            </div>
+            <ul class="program-list">
+              <li><a href="practices/practice1.html"><span class="lesson-number">1</span> Подготовка данных и настройка окружения</a></li>
+              <li><a href="practices/practice2.html"><span class="lesson-number">2</span> Генерация эмбеддингов</a></li>
+              <li><a href="practices/practice3.html"><span class="lesson-number">3</span> Векторная база данных</a></li>
+              <li><a href="practices/practice4.html"><span class="lesson-number">4</span> Интеграция с языковой моделью</a></li>
+              <li><a href="practices/practice5.html"><span class="lesson-number">5</span> Семантический поиск в RAG</a></li>
+              <li><a href="practices/practice6.html"><span class="lesson-number">6</span> Оценка качества RAG-системы</a></li>
+              <li><a href="practices/practice7.html"><span class="lesson-number">7</span> Оптимизация RAG-системы</a></li>
+              <li><a href="practices/practice8.html"><span class="lesson-number">8</span> Создание веб-интерфейса на Streamlit</a></li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- Блок с призывом к действию -->
+      <div class="cta-block">
+        <h3>Готовы проверить знания?</h3>
+        <p>Пройдите итоговый тест из 30 вопросов и получите оценку своей подготовки</p>
+        <a class="btn-light" href="tests/test.html">Пройти тест →</a>
+      </div>
+
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    Курс «Разработка RAG-систем» — 8 лекций, 8 практик, итоговый тест
+  </footer>
+
+  <script src="js/main.js"></script>
+</body>
+</html>

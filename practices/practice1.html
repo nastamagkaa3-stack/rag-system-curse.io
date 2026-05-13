@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Практика 1 — Подготовка данных и настройка окружения</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/style.css">
+<style>
+  /* Стили для изображений */
+  .content-block img:not(.img-grid-item) {
+    display: block;
+    max-width: 100%;
+    height: auto;
+    margin: 1.5rem auto;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  }
+
+  /* Сетка для групп изображений */
+  .image-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    justify-content: center;
+    margin: 1.5rem 0;
+  }
+  .image-grid figure {
+    flex: 1 1 250px;
+    margin: 0;
+    text-align: center;
+  }
+  .image-grid img {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  }
+  .image-grid figcaption {
+    font-size: 0.85rem;
+    color: #555;
+    margin-top: 0.5rem;
+  }
+
+  /* Кнопки перехода к лекциям */
+  .btn-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    justify-content: center;
+    margin: 1rem 0 2rem;
+  }
+  .btn-lecture {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: #1e3a5f;
+    color: white !important;
+    padding: 0.75rem 1.5rem;
+    border-radius: 40px;
+    text-decoration: none;
+    font-weight: 600;
+    transition: background 0.2s;
+  }
+  .btn-lecture:hover {
+    background: #2c5282;
+  }
+  .btn-lecture-secondary {
+    background: #4a5568;
+  }
+  .btn-lecture-secondary:hover {
+    background: #2d3748;
+  }
+
+  /* Стили для шагов практики (как в Практике 2) */
+  .practice-step {
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #e2e8f0;
+  }
+  .practice-step:last-child {
+    border-bottom: none;
+  }
+  .practice-step-number {
+    display: inline-block;
+    background: #1e3a5f;
+    color: white;
+    font-weight: 700;
+    font-size: 0.85rem;
+    padding: 0.2rem 0.6rem;
+    border-radius: 20px;
+    margin-right: 0.75rem;
+  }
+  .practice-step-title {
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin: 1rem 0 0.5rem 0;
+  }
+  .file-link {
+    background: #f0f4f8;
+    padding: 0.2rem 0.4rem;
+    border-radius: 6px;
+    font-family: monospace;
+    font-size: 0.9rem;
+  }
+  .criteria-table-wrap {
+    overflow-x: auto;
+    margin: 1.5rem 0;
+  }
+  .criteria-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: transparent;
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  .criteria-table th,
+  .criteria-table td {
+    padding: 0.75rem 1rem;
+    text-align: left;
+    border-bottom: 1px solid #e2e8f0;
+  }
+  .criteria-table th {
+    background: transparent;
+    color: #1e3a5f;
+    font-weight: 600;
+    border-bottom: 2px solid #cbd5e1;
+  }
+  .criteria-table tr:last-child td {
+    border-bottom: none;
+  }
+</style>
+</head>
+<body>
+<header class="site-header"><div class="header-inner">
+<a class="logo" href="../index.html">RAG <span>курс</span></a>
+<nav class="nav-desktop">
+<a href="../index.html">Главная</a>
+<a href="../lectures/lecture1.html">Лекции</a>
+<a href="practice1.html">Практики</a>
+<a href="../tests/test.html">Тест</a>
+</nav>
+<button type="button" class="menu-toggle" aria-expanded="false" aria-label="Меню">Меню</button>
+</div>
+<nav class="nav-mobile">
+<a href="../index.html">Главная</a>
+<a href="../lectures/lecture1.html">Лекции</a>
+<a href="practice1.html">Практики</a>
+<a href="../tests/test.html">Тест</a>
+</nav>
+</header>
+<main>
+<nav class="breadcrumb"><a href="../index.html">Главная</a> / <a href="practice1.html">Практики</a> / Практика 1</nav>
+
+<header class="page-header"><h1>Методическое пособие №1. Подготовка данных и настройка окружения</h1></header>
+
+<div class="practice-goal"><p class="practice-goal__label">Цель занятия</p><p>освоить создание виртуального окружения, установку необходимых библиотек и подготовку текстовых данных для RAG-системы</p></div>
+<p class="practice-duration"><strong>Продолжительность:</strong> 4 академических часа</p>
+
+<!-- Кнопки перехода к лекциям -->
+<div class="btn-group">
+  <a href="../lectures/lecture1.html" class="btn-lecture">📖 Перейти к лекции №1</a>
+  <a href="../lectures/lecture2.html" class="btn-lecture btn-lecture-secondary">📖 Перейти к лекции №2</a>
+</div>
+
+<section class="content-block">
+<h2>Пошаговая инструкция</h2>
+
+<p><strong>Теоретическое введение</strong></p>
+<p>Перед началом разработки RAG-системы необходимо настроить рабочее окружение. В этом занятии мы создадим изолированное Python-окружение с помощью модуля venv (встроенный в Python инструмент), установим необходимые библиотеки и подготовим тестовые документы. Мы будем работать с Python-скриптами (файлы .py), которые запускаются целиком из командной строки.</p>
+
+<p><strong>Основные понятия:</strong></p>
+<ul>
+<li><strong>Виртуальное окружение</strong> — изолированная среда Python для конкретного проекта, позволяющая избежать конфликтов между версиями библиотек</li>
+<li><strong>Текстовые документы</strong> — исходные данные, которые будут составлять базу знаний RAG-системы</li>
+<li><strong>Разбиение на фрагменты (chunking)</strong> — процесс деления документов на небольшие смысловые куски для эффективного поиска</li>
+</ul>
+
+<p><strong>Необходимые библиотеки:</strong></p>
+<ul>
+<li><strong>streamlit</strong> — для создания веб-интерфейса</li>
+<li><strong>langchain</strong> — для работы с LLM и цепочками обработки</li>
+<li><strong>sentence-transformers</strong> — для генерации эмбеддингов</li>
+<li><strong>chromadb</strong> — для векторной базы данных</li>
+<li><strong>PyPDF2 / python-docx</strong> — для чтения PDF и DOCX файлов</li>
+</ul>
+
+<h3>Пошаговое выполнение работы</h3>
+
+<!-- Шаг 1 -->
+<div class="practice-step">
+  <div class="practice-step-number">1</div>
+  <div class="practice-step-title">Установка Python и проверка окружения</div>
+  <p>Убедитесь, что Python установлен. Откройте PowerShell и выполните:</p>
+  <pre><code>python --version</code></pre>
+  <p>Должна отобразиться версия 3.10 или выше. Если Python не установлен, скачайте его с официального сайта python.org.</p>
+  <img src="../images/image1.png" alt="Проверка версии Python">
+  <p>Проверьте наличие менеджера пакетов pip:</p>
+  <pre><code>pip --version</code></pre>
+  <img src="../images/image2.png" alt="Проверка версии pip">
+</div>
+
+<!-- Шаг 2 -->
+<div class="practice-step">
+  <div class="practice-step-number">2</div>
+  <div class="practice-step-title">Создание структуры проекта</div>
+  <p>Создайте папку для проекта и необходимые подпапки:</p>
+  <div class="powershell-block copyable"><div class="powershell-block__bar"><span>PowerShell</span><button type="button" class="btn-copy">Копировать</button></div><pre><code># Перейдите в рабочую папку (например, на рабочий стол)
+cd C:\Users\%USERNAME%\Desktop</code></pre></div>
+  <img src="../images/image3.png" alt="Переход в рабочую папку">
+  <div class="powershell-block copyable"><div class="powershell-block__bar"><span>PowerShell</span><button type="button" class="btn-copy">Копировать</button></div><pre><code># Создайте папку проекта
+mkdir rag_course
+cd rag_course</code></pre></div>
+  <img src="../images/image4.png" alt="Создание папки проекта">
+  <div class="powershell-block copyable"><div class="powershell-block__bar"><span>PowerShell</span><button type="button" class="btn-copy">Копировать</button></div><pre><code># Создайте подпапки
+mkdir documents
+mkdir scripts
+mkdir data</code></pre></div>
+  <img src="../images/image5.png" alt="Создание подпапок">
+  <p>Структура проекта:</p>
+  <pre>C:\Users\%USERNAME%\Desktop\rag_course\
+├── documents\        # Здесь будут храниться исходные документы
+├── scripts\          # Здесь будут Python-скрипты
+└── data\            # Здесь будут сохраняться данные (индексы, эмбеддинги)</pre>
+</div>
+
+<!-- Шаг 3 -->
+<div class="practice-step">
+  <div class="practice-step-number">3</div>
+  <div class="practice-step-title">Создание виртуального окружения</div>
+  <p>В PowerShell выполните команды для создания и активации виртуального окружения:</p>
+  <div class="powershell-block copyable"><div class="powershell-block__bar"><span>PowerShell</span><button type="button" class="btn-copy">Копировать</button></div><pre><code># Создание виртуального окружения (папка venv появится в проекте)
+python -m venv venv</code></pre></div>
+  <div class="powershell-block copyable"><div class="powershell-block__bar"><span>PowerShell</span><button type="button" class="btn-copy">Копировать</button></div><pre><code># Активация виртуального окружения
+.\venv\Scripts\activate</code></pre></div>
+  <img src="../images/image6.png" alt="Активация виртуального окружения">
+  <p>После активации в начале строки PowerShell появится <strong>(venv)</strong>, что означает успешный вход в виртуальное окружение.</p>
+</div>
+
+<!-- Шаг 4 -->
+<div class="practice-step">
+  <div class="practice-step-number">4</div>
+  <div class="practice-step-title">Установка библиотек</div>
+  <p>Установите все необходимые библиотеки одной командой:</p>
+  <pre><code>pip install streamlit langchain langchain-community sentence-transformers chromadb PyPDF2 python-docx tiktoken</code></pre>
+  <p>Для проверки установки выполните: <code>pip list</code></p>
+  <div class="image-grid">
+    <figure><img src="../images/image7.png" alt="Установка библиотек 1"><figcaption>Установка 1</figcaption></figure>
+    <figure><img src="../images/image8.png" alt="Установка библиотек 2"><figcaption>Установка 2</figcaption></figure>
+    <figure><img src="../images/image9.png" alt="Установка библиотек 3"><figcaption>Установка 3</figcaption></figure>
+  </div>
+</div>
+
+<!-- Шаг 5 -->
+<div class="practice-step">
+  <div class="practice-step-number">5</div>
+  <div class="practice-step-title">Создание первого Python-скрипта</div>
+  <p>Создайте файл <span class="file-link">scripts/load_documents.py</span> с помощью любого текстового редактора (VS Code, Notepad++, или Блокнот).</p>
+  <p>Импортируйте необходимые библиотеки:</p>
+  <pre><code class="language-python">import os
+from PyPDF2 import PdfReader
+from docx import Document</code></pre>
+  <p><em>Подключает модули для работы с файловой системой (os), чтением PDF (PyPDF2) и DOCX (docx).</em></p>
+</div>
+
+<!-- Шаг 6 -->
+<div class="practice-step">
+  <div class="practice-step-number">6</div>
+  <div class="practice-step-title">Определение функции загрузки текстового файла</div>
+  <pre><code class="language-python">def load_text_file(filepath):
+    """Загрузка текстового файла"""
+    with open(filepath, 'r', encoding='utf-8') as f:
+        return f.read()</code></pre>
+  <p><em>Открывает .txt файл в кодировке UTF-8 и возвращает его содержимое в виде строки.</em></p>
+</div>
+
+<!-- Шаг 7 -->
+<div class="practice-step">
+  <div class="practice-step-number">7</div>
+  <div class="practice-step-title">Определение функции загрузки PDF файла</div>
+  <pre><code class="language-python">def load_pdf_file(filepath):
+    """Загрузка PDF файла"""
+    reader = PdfReader(filepath)
+    text = ""
+    for page in reader.pages:
+        text += page.extract_text()
+    return text</code></pre>
+  <p><em>Создаёт объект для чтения PDF, извлекает текст с каждой страницы и объединяет его в одну строку.</em></p>
+</div>
+
+<!-- Шаг 8 -->
+<div class="practice-step">
+  <div class="practice-step-number">8</div>
+  <div class="practice-step-title">Определение функции загрузки DOCX файла</div>
+  <pre><code class="language-python">def load_docx_file(filepath):
+    """Загрузка DOCX файла"""
+    doc = Document(filepath)
+    text = ""
+    for paragraph in doc.paragraphs:
+        text += paragraph.text + "\n"
+    return text</code></pre>
+  <p><em>Открывает DOCX-документ, проходит по всем абзацам, добавляя их текст с переносом строки, и возвращает результат.</em></p>
+</div>
+
+<!-- Шаг 9 -->
+<div class="practice-step">
+  <div class="practice-step-number">9</div>
+  <div class="practice-step-title">Определение функции массовой загрузки всех документов из папки</div>
+  <pre><code class="language-python">def load_all_documents(documents_folder):
+    """Загрузка всех документов из папки"""
+    documents = []
+    
+    for filename in os.listdir(documents_folder):
+        filepath = os.path.join(documents_folder, filename)
+        
+        if filename.endswith('.txt'):
+            text = load_text_file(filepath)
+            documents.append({'text': text, 'source': filename, 'type': 'txt'})
+        elif filename.endswith('.pdf'):
+            text = load_pdf_file(filepath)
+            documents.append({'text': text, 'source': filename, 'type': 'pdf'})
+        elif filename.endswith('.docx'):
+            text = load_docx_file(filepath)
+            documents.append({'text': text, 'source': filename, 'type': 'docx'})
+    
+    return documents</code></pre>
+  <p><em>Сканирует указанную папку, для каждого файла определяет тип по расширению, вызывает соответствующую функцию загрузки и сохраняет результат в виде списка словарей (с текстом, именем файла и типом).</em></p>
+</div>
+
+<!-- Шаг 10 -->
+<div class="practice-step">
+  <div class="practice-step-number">10</div>
+  <div class="practice-step-title">Проверка, запущен ли скрипт напрямую</div>
+  <pre><code class="language-python">if __name__ == "__main__":</code></pre>
+  <p><em>Убеждается, что код ниже выполнится только при прямом запуске файла (не при импорте как модуля).</em></p>
+</div>
+
+<!-- Шаг 11 -->
+<div class="practice-step">
+  <div class="practice-step-number">11</div>
+  <div class="practice-step-title">Определение пути к папке с документами</div>
+  <pre><code class="language-python">docs_folder = "../documents"</code></pre>
+  <p><em>Задаёт относительный путь к папке на уровень выше от текущей.</em></p>
+</div>
+
+<!-- Шаг 12 -->
+<div class="practice-step">
+  <div class="practice-step-number">12</div>
+  <div class="practice-step-title">Создание тестового документа, если папка пуста</div>
+  <pre><code class="language-python">if not os.listdir(docs_folder):
+    with open(os.path.join(docs_folder, "test_doc.txt"), 'w', encoding='utf-8') as f:
+        f.write("Искусственный интеллект - это область компьютерных наук...")</code></pre>
+  <p><em>Проверяет, пуста ли папка. Если да - создаёт внутри тестовый .txt файл с примером текста про ИИ.</em></p>
+</div>
+
+<!-- Шаг 13 -->
+<div class="practice-step">
+  <div class="practice-step-number">13</div>
+  <div class="practice-step-title">Загрузка всех документов из папки</div>
+  <pre><code class="language-python">docs = load_all_documents(docs_folder)</code></pre>
+  <p><em>Вызывает ранее определённую функцию для загрузки всех поддерживаемых документов и сохраняет результат в переменную docs.</em></p>
+</div>
+
+<!-- Шаг 14 -->
+<div class="practice-step">
+  <div class="practice-step-number">14</div>
+  <div class="practice-step-title">Вывод статистики о загруженных документах</div>
+  <pre><code class="language-python">print(f"Загружено документов: {len(docs)}")
+for doc in docs:
+    print(f"  - {doc['source']} ({len(doc['text'])} символов)")</code></pre>
+  <p><em>Печатает общее количество загруженных документов, а затем для каждого - его имя и количество символов в тексте.</em></p>
+  <img src="../images/image11.png" alt="Результат загрузки">
+</div>
+
+<!-- Шаг 15 -->
+<div class="practice-step">
+  <div class="practice-step-number">15</div>
+  <div class="practice-step-title">Разбиение текста на фрагменты</div>
+  <p>Создайте файл <span class="file-link">scripts/chunk_documents.py</span>. Импортируйте необходимые модули для разбиения документов:</p>
+  <pre><code class="language-python">import os
+import json
+from langchain_text_splitters import RecursiveCharacterTextSplitter</code></pre>
+  <p><em>Импортирует модули для работы с файловой системой, JSON и текстовый сплиттер из библиотеки langchain.</em></p>
+</div>
+
+<!-- Шаг 16 -->
+<div class="practice-step">
+  <div class="practice-step-number">16</div>
+  <div class="practice-step-title">Определение функции разбиения документов на фрагменты</div>
+  <pre><code class="language-python">def chunk_documents(documents, chunk_size=500, chunk_overlap=50):
+    """Разбивает документы на фрагменты"""
+    text_splitter = RecursiveCharacterTextSplitter(
+        chunk_size=chunk_size,
+        chunk_overlap=chunk_overlap,
+        separators=["\n\n", "\n", ". ", " ", ""]
+    )
+    
+    all_chunks = []
+    for doc in documents:
+        chunks = text_splitter.split_text(doc['text'])
+        for i, chunk in enumerate(chunks):
+            all_chunks.append({
+                'text': chunk,
+                'source': doc['source'],
+                'chunk_id': i,
+                'length': len(chunk)
+            })
+    
+    return all_chunks</code></pre>
+  <p><em>Создаёт сплиттер с заданными параметрами (размер фрагмента 500 символов, перекрытие 50), затем для каждого документа разбивает текст на фрагменты и сохраняет каждый фрагмент в виде словаря с текстом, источником, индексом и длиной.</em></p>
+</div>
+
+<!-- Шаг 17 -->
+<div class="practice-step">
+  <div class="practice-step-number">17</div>
+  <div class="practice-step-title">Определение функции сохранения фрагментов в JSON файл</div>
+  <pre><code class="language-python">def save_chunks_to_file(chunks, output_path):
+    """Сохраняет фрагменты в JSON файл"""
+    with open(output_path, 'w', encoding='utf-8') as f:
+        json.dump(chunks, f, ensure_ascii=False, indent=2)</code></pre>
+  <p><em>Открывает файл по указанному пути и сохраняет список фрагментов в формате JSON с отступами для читаемости.</em></p>
+</div>
+
+<!-- Шаг 18 -->
+<div class="practice-step">
+  <div class="practice-step-number">18</div>
+  <div class="practice-step-title">Проверка прямого запуска скрипта</div>
+  <pre><code class="language-python">if __name__ == "__main__":</code></pre>
+  <p><em>Проверяет, запущен ли скрипт напрямую, а не импортирован как модуль.</em></p>
+</div>
+
+<!-- Шаг 19 -->
+<div class="practice-step">
+  <div class="practice-step-number">19</div>
+  <div class="practice-step-title">Импорт функции загрузки документов из соседнего модуля</div>
+  <pre><code class="language-python">from load_documents import load_all_documents</code></pre>
+  <p><em>Импортирует функцию load_all_documents из файла load_documents.py.</em></p>
+</div>
+
+<!-- Шаг 20 -->
+<div class="practice-step">
+  <div class="practice-step-number">20</div>
+  <div class="practice-step-title">Загрузка документов из папки</div>
+  <pre><code class="language-python">docs = load_all_documents("../documents")</code></pre>
+  <p><em>Вызывает функцию загрузки всех документов из папки documents (на уровень выше).</em></p>
+</div>
+
+<!-- Шаг 21 -->
+<div class="practice-step">
+  <div class="practice-step-number">21</div>
+  <div class="practice-step-title">Разбиение загруженных документов на фрагменты</div>
+  <pre><code class="language-python">chunks = chunk_documents(docs)</code></pre>
+  <p><em>Применяет функцию разбиения к загруженным документам с параметрами по умолчанию.</em></p>
+</div>
+
+<!-- Шаг 22 -->
+<div class="practice-step">
+  <div class="practice-step-number">22</div>
+  <div class="practice-step-title">Сохранение фрагментов в JSON файл</div>
+  <pre><code class="language-python">save_chunks_to_file(chunks, "../data/chunks.json")</code></pre>
+  <p><em>Сохраняет полученные фрагменты в файл chunks.json в папке data.</em></p>
+</div>
+
+<!-- Шаг 23 -->
+<div class="practice-step">
+  <div class="practice-step-number">23</div>
+  <div class="practice-step-title">Вывод количества созданных фрагментов</div>
+  <pre><code class="language-python">print(f"Создано фрагментов: {len(chunks)}")</code></pre>
+  <p><em>Печатает общее количество созданных фрагментов.</em></p>
+</div>
+
+<!-- Шаг 24 -->
+<div class="practice-step">
+  <div class="practice-step-number">24</div>
+  <div class="practice-step-title">Вывод средней длины фрагмента</div>
+  <pre><code class="language-python">print(f"Средняя длина фрагмента: {sum(c['length'] for c in chunks)/len(chunks):.0f} символов")</code></pre>
+  <p><em>Вычисляет и печатает среднюю длину фрагмента в символах, округлённую до целого числа.</em></p>
+  <img src="../images/image12.png" alt="Результат разбиения">
+</div>
+
+<!-- Шаг 25 -->
+<div class="practice-step">
+  <div class="practice-step-number">25</div>
+  <div class="practice-step-title">Запуск скриптов</div>
+  <p>Запустите созданные скрипты из PowerShell:</p>
+  <div class="powershell-block copyable"><div class="powershell-block__bar"><span>PowerShell</span><button type="button" class="btn-copy">Копировать</button></div><pre><code># Перейдите в папку со скриптами
+cd scripts
+
+# Запустите скрипт загрузки документов
+python load_documents.py
+
+# Запустите скрипт разбиения на фрагменты
+python chunk_documents.py</code></pre></div>
+  <img src="../images/image13.png" alt="Запуск скриптов">
+</div>
+
+<h2>Задание для самостоятельного выполнения</h2>
+<ul>
+<li>Добавьте в папку documents 3-5 текстовых файлов (можно скачать статьи с Википедии или использовать любые тексты).</li>
+<li>Измените параметры разбиения: попробуйте chunk_size=300 и chunk_size=1000. Сравните количество полученных фрагментов.</li>
+<li>Добавьте в скрипт chunk_documents.py сохранение статистики в CSV файл (количество фрагментов по каждому документу).</li>
+<li>Напишите функцию, которая выводит на экран первые 200 символов каждого фрагмента для визуальной проверки качества разбиения.</li>
+</ul>
+
+<h2>Контрольные вопросы</h2>
+<ol>
+<li>Зачем нужно виртуальное окружение и как его создать?</li>
+<li>Какие форматы документов поддерживает ваша система загрузки?</li>
+<li>Почему документы разбиваются на фрагменты, а не индексируются целиком?</li>
+<li>Что означают параметры chunk_size и chunk_overlap?</li>
+<li>Как проверить, что библиотеки установлены корректно?</li>
+</ol>
+
+<h2>Критерии оценки</h2>
+<div class="criteria-table-wrap">
+  <table class="criteria-table">
+    <thead><tr><th>Критерий</th><th>Баллы</th></tr></thead>
+    <tbody>
+      <tr><td style="padding: 0.75rem 1rem;">Создано виртуальное окружение и установлены библиотеки</td><td style="text-align: center;">2</td></tr>
+      <tr><td style="padding: 0.75rem 1rem;">Создана правильная структура папок проекта</td><td style="text-align: center;">1</td></tr>
+      <tr><td style="padding: 0.75rem 1rem;">Реализована загрузка документов разных форматов</td><td style="text-align: center;">1</td></tr>
+      <tr><td style="padding: 0.75rem 1rem;">Реализовано разбиение на фрагменты</td><td style="text-align: center;">1</td></tr>
+      <tr><td style="padding: 0.75rem 1rem;">Сохранение результатов в JSON/CSV</td><td style="text-align: center;">1</td></tr>
+      <tr><td style="padding: 0.75rem 1rem;">Выполнено дополнительное задание</td><td style="text-align: center;">4</td></tr>
+    </tbody>
+  </table>
+</div>
+<p><strong>Максимальный балл: 10</strong></p>
+</section>
+
+<nav class="nav-prev-next"><span></span><a href="practice2.html">Практика 2 →</a></nav>
+</main>
+<footer class="site-footer">Практика 1</footer>
+<script src="../js/main.js"></script>
+</body>
+</html>

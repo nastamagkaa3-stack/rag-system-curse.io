@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Практика 2 — Генерация эмбеддингов</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/style.css">
+<style>
+  .content-block img:not(.img-grid-item) {
+    display: block;
+    max-width: 100%;
+    height: auto;
+    margin: 1.5rem auto;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  }
+  .image-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    justify-content: center;
+    margin: 1.5rem 0;
+  }
+  .image-grid figure {
+    flex: 1 1 250px;
+    margin: 0;
+    text-align: center;
+  }
+  .image-grid img {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  }
+  .image-grid figcaption {
+    font-size: 0.85rem;
+    color: #555;
+    margin-top: 0.5rem;
+  }
+  .btn-lecture {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: #1e3a5f;
+    color: white !important;
+    padding: 0.75rem 1.5rem;
+    border-radius: 40px;
+    text-decoration: none;
+    font-weight: 600;
+    margin: 1rem 0 2rem;
+    transition: background 0.2s;
+  }
+  .btn-lecture:hover {
+    background: #2c5282;
+  }
+  .criteria-table-wrap {
+    overflow-x: auto;
+    margin: 1.5rem 0;
+  }
+  .criteria-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: transparent;
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  .criteria-table th,
+  .criteria-table td {
+    padding: 0.75rem 1rem;
+    text-align: left;
+    border-bottom: 1px solid #e2e8f0;
+  }
+  .criteria-table th {
+    background: transparent;
+    color: #1e3a5f;
+    font-weight: 600;
+    border-bottom: 2px solid #cbd5e1;
+  }
+  .criteria-table tr:last-child td {
+    border-bottom: none;
+  }
+  .practice-step {
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #e2e8f0;
+  }
+  .practice-step-number {
+    display: inline-block;
+    background: #1e3a5f;
+    color: white;
+    font-weight: 700;
+    font-size: 0.85rem;
+    padding: 0.2rem 0.6rem;
+    border-radius: 20px;
+    margin-right: 0.75rem;
+  }
+  .practice-step-title {
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin: 1rem 0 0.5rem 0;
+  }
+  .file-link {
+    background: #f0f4f8;
+    padding: 0.2rem 0.4rem;
+    border-radius: 6px;
+    font-family: monospace;
+    font-size: 0.9rem;
+  }
+</style>
+</head>
+<body>
+<header class="site-header"><div class="header-inner">
+<a class="logo" href="../index.html">RAG <span>курс</span></a>
+<nav class="nav-desktop">
+<a href="../index.html">Главная</a>
+<a href="../lectures/lecture3.html">Лекции</a>
+<a href="practice2.html">Практики</a>
+<a href="../tests/test.html">Тест</a>
+</nav>
+<button type="button" class="menu-toggle" aria-expanded="false" aria-label="Меню">Меню</button>
+</div>
+<nav class="nav-mobile">
+<a href="../index.html">Главная</a>
+<a href="../lectures/lecture3.html">Лекции</a>
+<a href="practice2.html">Практики</a>
+<a href="../tests/test.html">Тест</a>
+</nav>
+</header>
+<main>
+<nav class="breadcrumb"><a href="../index.html">Главная</a> / <a href="practice1.html">Практики</a> / Практика 2</nav>
+<header class="page-header"><h1>Методическое пособие №2. Генерация эмбеддингов</h1></header>
+<div class="practice-goal"><p class="practice-goal__label">Цель занятия</p><p>Научиться создавать эмбеддинги для текстовых фрагментов с помощью модели sentence-transformers и сохранять их для последующего использования</p></div>
+<p class="practice-duration"><strong>Продолжительность:</strong> 4 академических часа</p>
+
+<div style="text-align: center;">
+  <a href="../lectures/lecture3.html" class="btn-lecture">📖 Перейти к лекции №3</a>
+</div>
+
+<section class="content-block">
+<h2>Пошаговая инструкция</h2>
+
+<p><strong>Теоретическое введение</strong></p>
+<p>Эмбеддинги - это числовые векторы, которые представляют смысл текста в многомерном пространстве.</p>
+<img src="../images/image14.png" alt="Визуализация эмбеддингов">
+
+<p>Для работы с русскоязычным текстом мы будем использовать модель <strong>cointegrated/rubert-tiny2</strong>. Эта модель:</p>
+<ul>
+<li>Специально обучена на русскоязычных текстах</li>
+<li>Имеет небольшой размер (~30 МБ) - подходит для любого компьютера</li>
+<li>Доступна для скачивания в России</li>
+<li>Создаёт векторы размерностью 312 (хороший баланс скорости и качества)</li>
+</ul>
+
+<div class="practice-step">
+  <div class="practice-step-number">1</div>
+  <div class="practice-step-title">Активация окружения</div>
+  <p>Откройте PowerShell и перейдите в папку проекта:</p>
+  <div class="powershell-block copyable"><div class="powershell-block__bar"><span>PowerShell</span><button type="button" class="btn-copy">Копировать</button></div><pre><code>cd C:\Users\%USERNAME%\Desktop\rag_course
+.\venv\Scripts\activate</code></pre></div>
+  <img src="../images/image15.png" alt="Активация виртуального окружения">
+</div>
+
+<div class="practice-step">
+  <div class="practice-step-number">2</div>
+  <div class="practice-step-title">Установка библиотек (если еще не установлены)</div>
+  <div class="powershell-block copyable"><div class="powershell-block__bar"><span>PowerShell</span><button type="button" class="btn-copy">Копировать</button></div><pre><code>pip install sentence-transformers torch transformers</code></pre></div>
+  <img src="../images/image16.png" alt="Установка библиотек для эмбеддингов">
+</div>
+
+<div class="practice-step">
+  <div class="practice-step-number">3</div>
+  <div class="practice-step-title">Создание скрипта для генерации эмбеддингов</div>
+  <p>Создайте файл <span class="file-link">scripts/generate_embeddings.py</span>. Импортируйте необходимые библиотеки для генерации эмбеддингов:</p>
+  <pre><code class="language-python">import json
+import numpy as np
+from sentence_transformers import SentenceTransformer
+import time</code></pre>
+  <p><em>Импортирует модули для работы с JSON, числовыми массивами (NumPy), генерацией эмбеддингов (sentence_transformers) и замерами времени выполнения.</em></p>
+</div>
+
+<div class="practice-step">
+  <div class="practice-step-number">4</div>
+  <div class="practice-step-title">Определение функции загрузки фрагментов из JSON файла</div>
+  <pre><code class="language-python">def load_chunks(filepath):
+    """Загрузка фрагментов из JSON файла"""
+    with open(filepath, 'r', encoding='utf-8') as f:
+        return json.load(f)</code></pre>
+  <p><em>Открывает JSON файл по указанному пути и возвращает загруженные данные (список фрагментов).</em></p>
+</div>
+
+<div class="practice-step">
+  <div class="practice-step-number">5</div>
+  <div class="practice-step-title">Определение функции генерации эмбеддингов</div>
+  <pre><code class="language-python">def generate_embeddings(chunks, model_name='cointegrated/rubert-tiny2'):
+    """
+    Генерация эмбеддингов для всех фрагментов
+    Используется русскоязычная модель rubert-tiny2
+    """
+    print(f"Загрузка модели {model_name}...")
+    print("Модель оптимизирована для работы с русским языком")
+    model = SentenceTransformer(model_name)
+    
+    # Извлекаем тексты фрагментов
+    texts = [chunk['text'] for chunk in chunks]
+    
+    print(f"Генерация эмбеддингов для {len(texts)} фрагментов...")
+    start_time = time.time()
+    
+    # Генерация эмбеддингов
+    embeddings = model.encode(texts, show_progress_bar=True)
+    
+    elapsed = time.time() - start_time
+    print(f"Генерация завершена за {elapsed:.2f} секунд")
+    print(f"Размерность эмбеддингов: {embeddings.shape[1]}")
+    print(f"Пример эмбеддинга (первые 5 чисел): {embeddings[0][:5]}")
+    
+    return embeddings, model</code></pre>
+  <p><em>Загружает предобученную русскоязычную модель rubert-tiny2, извлекает тексты из фрагментов, генерирует векторные представления (эмбеддинги) для каждого фрагмента, выводит статистику (время выполнения, размерность эмбеддингов, пример значений) и возвращает эмбеддинги вместе с моделью.</em></p>
+</div>
+
+<div class="practice-step">
+  <div class="practice-step-number">6</div>
+  <div class="practice-step-title">Определение функции сохранения эмбеддингов и метаданных</div>
+  <pre><code class="language-python">def save_embeddings(embeddings, chunks, output_path):
+    """Сохраняет эмбеддинги и соответствующие им тексты"""
+    # Сохраняем эмбеддинги в .npy файл (бинарный формат для массивов NumPy)
+    np.save(f"{output_path}/embeddings.npy", embeddings)
+    
+    # Сохраняем тексты и метаданные
+    metadata = []
+    for i, chunk in enumerate(chunks):
+        metadata.append({
+            'id': i,
+            'text': chunk['text'],
+            'source': chunk['source'],
+            'chunk_id': chunk['chunk_id']
+        })
+    
+    with open(f"{output_path}/metadata.json", 'w', encoding='utf-8') as f:
+        json.dump(metadata, f, ensure_ascii=False, indent=2)
+        
+    print(f"Данные сохранены в {output_path}")</code></pre>
+  <p><em>Сохраняет эмбеддинги в бинарный .npy файл, создаёт метаданные (id, текст, источник, идентификатор фрагмента) для каждого эмбеддинга и сохраняет их в JSON файл.</em></p>
+</div>
+
+<div class="practice-step">
+  <div class="practice-step-number">7</div>
+  <div class="practice-step-title">Определение функции поиска по текстовому запросу</div>
+  <pre><code class="language-python">def search_by_text(query, model, embeddings, chunks, top_k=5):
+    """Поиск наиболее релевантных фрагментов по текстовому запросу"""
+    # Генерируем эмбеддинг запроса
+    query_embedding = model.encode([query])
+    
+    # Вычисляем косинусное сходство
+    from numpy.linalg import norm
+    similarities = np.dot(embeddings, query_embedding.T).flatten()
+    similarities = similarities / (norm(embeddings, axis=1) * norm(query_embedding))
+    
+    # Получаем топ-k индексов
+    top_indices = np.argsort(similarities)[-top_k:][::-1]
+    
+    results = []
+    for idx in top_indices:
+        results.append({
+            'text': chunks[idx]['text'],
+            'source': chunks[idx]['source'],
+            'similarity': float(similarities[idx])
+        })
+    
+    return results</code></pre>
+  <p><em>Генерирует эмбеддинг для текстового запроса, вычисляет косинусное сходство между эмбеддингом запроса и всеми эмбеддингами фрагментов, сортирует результаты по убыванию сходства и возвращает топ-k наиболее релевантных фрагментов с их текстом, источником и значением сходства.</em></p>
+</div>
+
+<div class="practice-step">
+  <div class="practice-step-number">8</div>
+  <div class="practice-step-title">Проверка прямого запуска скрипта</div>
+  <pre><code class="language-python">if __name__ == "__main__":</code></pre>
+  <p><em>Проверяет, запущен ли скрипт напрямую, а не импортирован как модуль.</em></p>
+</div>
+
+<div class="practice-step">
+  <div class="practice-step-number">9</div>
+  <div class="practice-step-title">Загрузка фрагментов из JSON файла</div>
+  <pre><code class="language-python">chunks = load_chunks("../data/chunks.json")</code></pre>
+  <p><em>Загружает ранее сохранённые фрагменты из файла chunks.json в папке data.</em></p>
+</div>
+
+<div class="practice-step">
+  <div class="practice-step-number">10</div>
+  <div class="practice-step-title">Генерация эмбеддингов для загруженных фрагментов</div>
+  <pre><code class="language-python">embeddings, model = generate_embeddings(chunks)</code></pre>
+  <p><em>Вызывает функцию генерации эмбеддингов для всех загруженных фрагментов, используя русскоязычную модель.</em></p>
+</div>
+
+<div class="practice-step">
+  <div class="practice-step-number">11</div>
+  <div class="practice-step-title">Сохранение эмбеддингов и метаданных</div>
+  <pre><code class="language-python">save_embeddings(embeddings, chunks, "../data")</code></pre>
+  <p><em>Сохраняет сгенерированные эмбеддинги и метаданные в папку data.</em></p>
+</div>
+
+<div class="practice-step">
+  <div class="practice-step-number">12</div>
+  <div class="practice-step-title">Создание тестового поискового запроса на русском языке</div>
+  <pre><code class="language-python">test_query = "Что такое искусственный интеллект?"
+print(f"\nТестовый запрос (русский): {test_query}")</code></pre>
+  <p><em>Определяет тестовый поисковый запрос на русском языке и выводит его на экран.</em></p>
+</div>
+
+<div class="practice-step">
+  <div class="practice-step-number">13</div>
+  <div class="practice-step-title">Выполнение поиска по тестовому запросу</div>
+  <pre><code class="language-python">results = search_by_text(test_query, model, embeddings, chunks)</code></pre>
+  <p><em>Вызывает функцию поиска для нахождения наиболее релевантных фрагментов по тестовому запросу.</em></p>
+</div>
+
+<div class="practice-step">
+  <div class="practice-step-number">14</div>
+  <div class="practice-step-title">Вывод результатов поиска</div>
+  <pre><code class="language-python">print("\nТоп-5 результатов:")
+for i, r in enumerate(results):
+    print(f"{i+1}. [Источник: {r['source']}, Сходство: {r['similarity']:.4f}]")
+    print(f"   {r['text'][:100]}...")</code></pre>
+  <p><em>Выводит топ-5 результатов поиска с указанием источника файла, числового значения сходства и первых 100 символов найденного текста.</em></p>
+  <img src="../images/image17.png" alt="Результаты поиска">
+</div>
+
+<div class="practice-step">
+  <div class="practice-step-number">15</div>
+  <div class="practice-step-title">Создание класса SemanticSearch</div>
+  <p>Создайте файл <span class="file-link">scripts/search_utils.py</span>. Импортируйте необходимые библиотеки для семантического поиска:</p>
+  <pre><code class="language-python">import numpy as np
+import json
+from sentence_transformers import SentenceTransformer</code></pre>
+  <p><em>Импортирует модули для работы с числовыми массивами (NumPy), JSON и генерацией эмбеддингов (sentence_transformers).</em></p>
+</div>
+
+<div class="practice-step">
+  <div class="practice-step-number">16</div>
+  <div class="practice-step-title">Определение класса SemanticSearch</div>
+  <pre><code class="language-python">class SemanticSearch:
+    """Класс для семантического поиска по документам с использованием русскоязычной модели"""</code></pre>
+  <p><em>Создаёт класс для организации семантического поиска по ранее обработанным документам.</em></p>
+</div>
+
+<div class="practice-step">
+  <div class="practice-step-number">17</div>
+  <div class="practice-step-title">Определение метода инициализации класса</div>
+  <pre><code class="language-python">def __init__(self, data_path, model_name='cointegrated/rubert-tiny2'):
+    # Загрузка эмбеддингов
+    self.embeddings = np.load(f"{data_path}/embeddings.npy")
+    
+    # Загрузка метаданных
+    with open(f"{data_path}/metadata.json", 'r', encoding='utf-8') as f:
+        self.metadata = json.load(f)
+    
+    # Загрузка русскоязычной модели
+    print(f"Загрузка модели {model_name} (оптимизирована для русского языка)...")
+    self.model = SentenceTransformer(model_name)
+    
+    print(f"Загружено {len(self.metadata)} фрагментов")
+    print(f"Размерность эмбеддингов: {self.embeddings.shape[1]}")</code></pre>
+  <p><em>Загружает предварительно сохранённые эмбеддинги из .npy файла, загружает метаданные (тексты и источники) из JSON файла, инициализирует русскоязычную модель для генерации эмбеддингов запросов, выводит информацию о количестве фрагментов и размерности эмбеддингов.</em></p>
+</div>
+
+<div class="practice-step">
+  <div class="practice-step-number">18</div>
+  <div class="practice-step-title">Определение метода поиска релевантных фрагментов</div>
+  <pre><code class="language-python">def search(self, query, top_k=5):
+    """Поиск релевантных фрагментов (поддерживает русский язык)"""
+    # Генерация эмбеддинга запроса
+    query_embedding = self.model.encode([query])
+    
+    # Вычисление косинусного сходства
+    from numpy.linalg import norm
+    similarities = np.dot(self.embeddings, query_embedding.T).flatten()
+    similarities = similarities / (norm(self.embeddings, axis=1) * norm(query_embedding))
+    
+    # Получение топ-k
+    top_indices = np.argsort(similarities)[-top_k:][::-1]
+    
+    results = []
+    for idx in top_indices:
+        results.append({
+            'text': self.metadata[idx]['text'],
+            'source': self.metadata[idx]['source'],
+            'similarity': float(similarities[idx])
+        })
+    
+    return results</code></pre>
+  <p><em>Генерирует эмбеддинг для текстового запроса, вычисляет косинусное сходство между эмбеддингом запроса и всеми загруженными эмбеддингами фрагментов, нормализует значения, находит top_k наиболее похожих фрагментов, формирует список результатов с текстом, источником и значением сходства, возвращает результаты.</em></p>
+</div>
+
+<div class="practice-step">
+  <div class="practice-step-number">19</div>
+  <div class="practice-step-title">Определение метода поиска с выводом результатов</div>
+  <pre><code class="language-python">def search_and_display(self, query, top_k=3):
+    """Поиск с выводом результатов"""
+    results = self.search(query, top_k)
+    
+    print(f"\nЗапрос: {query}")
+    print("-" * 50)
+    for i, r in enumerate(results):
+        print(f"{i+1}. [Источник: {r['source']}, Сходство: {r['similarity']:.4f}]")
+        print(f"   {r['text'][:200]}...")
+        print()
+    
+    return results</code></pre>
+  <p><em>Вызывает метод search для получения результатов, выводит запрос и разделитель, для каждого результата печатает порядковый номер, источник файла, значение сходства и первые 200 символов текста, добавляет пустую строку между результатами, возвращает результаты.</em></p>
+  <img src="../images/image18.png" alt="Класс SemanticSearch">
+</div>
+
+<div class="practice-step">
+  <div class="practice-step-number">20.1</div>
+  <div class="practice-step-title">Запуск скриптов</div>
+  <div class="powershell-block copyable"><div class="powershell-block__bar"><span>PowerShell</span><button type="button" class="btn-copy">Копировать</button></div><pre><code>cd scripts
+python generate_embeddings.py
+python -c "from search_utils import SemanticSearch; s = SemanticSearch('../data'); s.search_and_display('Что такое нейронные сети?')"</code></pre></div>
+  <img src="../images/image19.png" alt="Запуск генерации эмбеддингов">
+</div>
+
+<div class="practice-step">
+  <div class="practice-step-number">20.2</div>
+  <div class="practice-step-title">Альтернативный способ загрузки модели (если не идёт автоматическая загрузка)</div>
+  
+  <p><strong>Часть 1.</strong> Откройте браузер и скачайте файлы модели по этим ссылкам:</p>
+  <ul>
+    <li><a href="https://huggingface.co/cointegrated/rubert-tiny2/resolve/main/model.safetensors">model.safetensors</a></li>
+    <li><a href="https://huggingface.co/cointegrated/rubert-tiny2/resolve/main/config.json">config.json</a></li>
+    <li><a href="https://huggingface.co/cointegrated/rubert-tiny2/resolve/main/tokenizer.json">tokenizer.json</a></li>
+    <li><a href="https://huggingface.co/cointegrated/rubert-tiny2/resolve/main/tokenizer_config.json">tokenizer_config.json</a></li>
+    <li><a href="https://huggingface.co/cointegrated/rubert-tiny2/resolve/main/vocab.txt">vocab.txt</a></li>
+    <li><a href="https://huggingface.co/cointegrated/rubert-tiny2/resolve/main/special_tokens_map.json">special_tokens_map.json</a></li>
+  </ul>
+
+  <p><strong>Часть 2.</strong> Создайте папки и переместите файлы. Скопируйте и вставьте эту команду в PowerShell целиком:</p>
+  <div class="powershell-block copyable"><div class="powershell-block__bar"><span>PowerShell</span><button type="button" class="btn-copy">Копировать</button></div><pre><code>$hash = "e8ed3b0c8bbf4fb6984c3de043bf7d2f4e5969ae"
+Remove-Item -Recurse -Force "$env:USERPROFILE\.cache\huggingface\hub\models--cointegrated--rubert-tiny2" -ErrorAction SilentlyContinue
+New-Item -ItemType Directory -Force -Path "$env:USERPROFILE\.cache\huggingface\hub\models--cointegrated--rubert-tiny2\snapshots\$hash"
+New-Item -ItemType Directory -Force -Path "$env:USERPROFILE\.cache\huggingface\hub\models--cointegrated--rubert-tiny2\refs"
+Set-Content -Path "$env:USERPROFILE\.cache\huggingface\hub\models--cointegrated--rubert-tiny2\refs\main" -Value $hash
+Write-Host "Папки созданы. Теперь переместите скачанные файлы в:"
+Write-Host "$env:USERPROFILE\.cache\huggingface\hub\models--cointegrated--rubert-tiny2\snapshots\$hash"</code></pre></div>
+  <p>После выполнения команды переместите все скачанные файлы в указанную папку.</p>
+
+  <p><strong>Часть 3.</strong> Запустите генерацию эмбеддингов</p>
+  <div class="powershell-block copyable"><div class="powershell-block__bar"><span>PowerShell</span><button type="button" class="btn-copy">Копировать</button></div><pre><code>cd C:\Users\%USERNAME%\Desktop\rag_course
+.\venv\Scripts\activate
+cd scripts
+python generate_embeddings.py</code></pre></div>
+</div>
+
+<h2>Задание для самостоятельного выполнения</h2>
+<ul>
+<li>Попробуйте другую модель эмбеддингов (например, all-mpnet-base-v2). Сравните качество поиска и время генерации.</li>
+<li>Добавьте в класс SemanticSearch метод для поиска с фильтрацией по источнику документа.</li>
+<li>Реализуйте сохранение результатов поиска в текстовый файл для последующего анализа.</li>
+<li>Напишите функцию, которая принимает список запросов и выводит среднюю точность поиска (для этого нужно вручную разметить релевантные документы).</li>
+</ul>
+
+<h2>Контрольные вопросы</h2>
+<ol>
+<li>Что такое эмбеддинги и зачем они нужны в RAG?</li>
+<li>Как вычисляется косинусное сходство между векторами?</li>
+<li>Почему для русского текста выбрана модель cointegrated/rubert-tiny2?</li>
+<li>Какой размерностью обладают эмбеддинги этой модели?</li>
+<li>Чем отличается работа с e5-small-en-ru от rubert-tiny2?</li>
+</ol>
+
+<h2>Критерии оценки</h2>
+<div class="criteria-table-wrap">
+  <table class="criteria-table">
+    <thead><tr><th>Критерий</th><th>Баллы</th></tr></thead>
+    <tbody>
+      <tr><td>Успешная генерация эмбеддингов для всех фрагментов</td><td style="text-align: center;">2</td></tr>
+      <tr><td>Сохранение эмбеддингов и метаданных</td><td style="text-align: center;">2</td></tr>
+      <tr><td>Реализация функции поиска</td><td style="text-align: center;">2</td></tr>
+      <tr><td>Тестирование поиска на разных запросах</td><td style="text-align: center;">2</td></tr>
+      <tr><td>Выполнено дополнительное задание</td><td style="text-align: center;">2</td></tr>
+    </tbody>
+  </table>
+</div>
+<p><strong>Максимальный балл: 10</strong></p>
+</section>
+
+<nav class="nav-prev-next"><a href="practice1.html">← Практика 1</a><a href="practice3.html">Практика 3 →</a></nav>
+</main>
+<footer class="site-footer">Практика 2</footer>
+<script src="../js/main.js"></script>
+</body>
+</html>

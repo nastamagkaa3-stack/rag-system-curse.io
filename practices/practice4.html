@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Практика 4 — Интеграция с языковой моделью</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/style.css">
+<style>
+  .content-block img:not(.img-grid-item) {
+    display: block;
+    max-width: 100%;
+    height: auto;
+    margin: 1.5rem auto;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  }
+  .image-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    justify-content: center;
+    margin: 1.5rem 0;
+  }
+  .image-grid figure {
+    flex: 1 1 250px;
+    margin: 0;
+    text-align: center;
+  }
+  .image-grid img {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  }
+  .image-grid figcaption {
+    font-size: 0.85rem;
+    color: #555;
+    margin-top: 0.5rem;
+  }
+  .btn-lecture {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: #1e3a5f;
+    color: white !important;
+    padding: 0.75rem 1.5rem;
+    border-radius: 40px;
+    text-decoration: none;
+    font-weight: 600;
+    margin: 1rem 0 2rem;
+    transition: background 0.2s;
+  }
+  .btn-lecture:hover {
+    background: #2c5282;
+  }
+  .criteria-table-wrap {
+    overflow-x: auto;
+    margin: 1.5rem 0;
+  }
+  .criteria-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: transparent;
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  .criteria-table th,
+  .criteria-table td {
+    padding: 0.75rem 1rem;
+    text-align: left;
+    border-bottom: 1px solid #e2e8f0;
+  }
+  .criteria-table th {
+    background: transparent;
+    color: #1e3a5f;
+    font-weight: 600;
+    border-bottom: 2px solid #cbd5e1;
+  }
+  .criteria-table tr:last-child td {
+    border-bottom: none;
+  }
+  .practice-step {
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #e2e8f0;
+  }
+  .practice-step:last-child {
+    border-bottom: none;
+  }
+  .practice-step-number {
+    display: inline-block;
+    background: #1e3a5f;
+    color: white;
+    font-weight: 700;
+    font-size: 0.85rem;
+    padding: 0.2rem 0.6rem;
+    border-radius: 20px;
+    margin-right: 0.75rem;
+  }
+  .practice-step-title {
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin: 1rem 0 0.5rem 0;
+  }
+  .file-link {
+    background: #f0f4f8;
+    padding: 0.2rem 0.4rem;
+    border-radius: 6px;
+    font-family: monospace;
+    font-size: 0.9rem;
+  }
+</style>
+</head>
+<body>
+<header class="site-header"><div class="header-inner">
+<a class="logo" href="../index.html">RAG <span>курс</span></a>
+<nav class="nav-desktop">
+<a href="../index.html">Главная</a>
+<a href="../lectures/lecture5.html">Лекции</a>
+<a href="practice4.html">Практики</a>
+<a href="../tests/test.html">Тест</a>
+</nav>
+<button type="button" class="menu-toggle" aria-expanded="false" aria-label="Меню">Меню</button>
+</div>
+<nav class="nav-mobile">
+<a href="../index.html">Главная</a>
+<a href="../lectures/lecture5.html">Лекции</a>
+<a href="practice4.html">Практики</a>
+<a href="../tests/test.html">Тест</a>
+</nav>
+</header>
+<main>
+<nav class="breadcrumb"><a href="../index.html">Главная</a> / <a href="practice1.html">Практики</a> / Практика 4</nav>
+<header class="page-header"><h1>Методическое пособие №4. Интеграция с языковой моделью</h1></header>
+<div class="practice-goal"><p class="practice-goal__label">Цель занятия</p><p>Научиться интегрировать языковую модель (через API OpenAI или локально через Ollama) с поисковой системой для получения ответов на вопросы</p></div>
+<p class="practice-duration"><strong>Продолжительность:</strong> 4 академических часа</p>
+
+<div style="text-align: center;">
+  <a href="../lectures/lecture5.html" class="btn-lecture">📖 Перейти к лекции №5</a>
+</div>
+
+<section class="content-block">
+<h2>Пошаговая инструкция</h2>
+
+<p><strong>Теоретическое введение</strong></p>
+<p>RAG-пайплайн объединяет два компонента:</p>
+<ul>
+<li><strong>Поиск (Retrieval)</strong> - нахождение релевантных фрагментов в векторной БД</li>
+<li><strong>Генерация (Generation)</strong> - формирование ответа на основе найденного контекста</li>
+</ul>
+
+<p><strong>Варианты работы с LLM:</strong></p>
+<ul>
+<li>Через API OpenAI - просто, но требует API-ключа и оплаты</li>
+<li>Локально через Ollama - бесплатно, но требует установки Ollama</li>
+</ul>
+<img src="../images/rag-scheme.png" alt="Схема RAG-пайплайна">
+
+<!-- Шаг 1 -->
+<div class="practice-step">
+  <div class="practice-step-number">1</div>
+  <div class="practice-step-title">Выбор способа работы с LLM</div>
+  <p><strong>Вариант А (рекомендуемый): Локальная модель через Ollama</strong></p>
+  <p>Установите Ollama с официального сайта: <a href="https://ollama.com">https://ollama.com</a></p>
+  <p>После установки откройте новое окно PowerShell и выполните:</p>
+  <div class="powershell-block copyable"><div class="powershell-block__bar"><span>PowerShell</span><button type="button" class="btn-copy">Копировать</button></div><pre><code># Скачивание модели (однократно)
+ollama pull qwen2.5</code></pre></div>
+  <img src="../images/image25.png" alt="Скачивание модели Qwen2.5">
+  <p>Убедитесь, что сервер Ollama запущен (в отдельном окне PowerShell):</p>
+  <div class="powershell-block copyable"><div class="powershell-block__bar"><span>PowerShell</span><button type="button" class="btn-copy">Копировать</button></div><pre><code>ollama serve</code></pre></div>
+  <img src="../images/image26.png" alt="Запуск сервера Ollama">
+  <p><strong>Вариант Б: Если скачивание через PowerShell не идёт (ручная установка)</strong></p>
+  <p>Откройте браузер и скачайте GGUF-версию Qwen2.5: <a href="https://huggingface.co/mradermacher/Qwen2.5-1.5B-Instruct-GGUF/resolve/main/Qwen2.5-1.5B-Instruct.Q4_K_M.gguf">Qwen2.5-1.5B-Q4_K_M.gguf</a> (~1 ГБ)</p>
+  <p><strong>Вариант С: OpenAI API</strong></p>
+  <p>Получите API-ключ на platform.openai.com. Затем создайте файл <span class="file-link">.env</span> в папке проекта:</p>
+  <pre><code>OPENAI_API_KEY=ваш_ключ_здесь</code></pre>
+</div>
+
+<!-- Шаг 2 -->
+<div class="practice-step">
+  <div class="practice-step-number">2</div>
+  <div class="practice-step-title">Создание RAG-пайплайна</div>
+  <p>Создайте файл <span class="file-link">scripts/rag_pipeline.py</span>. Импортируйте библиотеки:</p>
+  <pre><code class="language-python"># scripts/rag_pipeline.py
+import requests
+import json
+from chroma_manager import ChromaVectorStore</code></pre>
+  <p><em>Импортируются библиотеки для HTTP-запросов, работы с JSON и класс для работы с векторной БД.</em></p>
+</div>
+
+<!-- Шаг 3 -->
+<div class="practice-step">
+  <div class="practice-step-number">3</div>
+  <div class="practice-step-title">Определение класса RAGPipeline и конструктора</div>
+  <pre><code class="language-python">class RAGPipeline:
+    """Класс для RAG-пайплайна (поиск + генерация) с поддержкой Qwen2.5"""
+    
+    def __init__(self, vector_store, use_local=True, model_name="qwen2.5:3b"):
+        self.vector_store = vector_store
+        self.use_local = use_local
+        
+        if use_local:
+            self.model_name = model_name
+            self.api_url = "http://localhost:11435/api/generate"
+        else:
+            import os
+            from openai import OpenAI
+            self.client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+            self.model_name = "gpt-3.5-turbo"</code></pre>
+  <p><em>Создаётся класс RAGPipeline, в конструкторе инициализируются векторное хранилище, выбор между локальной LLM и OpenAI API, а также URL для Ollama на порту 11435.</em></p>
+</div>
+
+<!-- Шаг 4 -->
+<div class="practice-step">
+  <div class="practice-step-number">4</div>
+  <div class="practice-step-title">Метод получения контекста из векторной БД</div>
+  <pre><code class="language-python">def get_context(self, query, n_results=3):
+    """Получение релевантного контекста из векторной БД"""
+    results = self.vector_store.search(query, n_results=n_results)
+    
+    context = ""
+    sources = []
+    for i, r in enumerate(results):
+        context += f"\n[Документ {i+1}]:\n{r['text']}\n"
+        sources.append(r['source'])
+    
+    return context, sources</code></pre>
+  <p><em>Выполняется поиск в векторной БД, результаты форматируются в единый текстовый блок с нумерацией документов, возвращается контекст и список источников.</em></p>
+</div>
+
+<!-- Шаг 5 -->
+<div class="practice-step">
+  <div class="practice-step-number">5</div>
+  <div class="practice-step-title">Метод создания промпта для Qwen2.5</div>
+  <pre><code class="language-python">def create_prompt(self, query, context):
+    """Создание промпта для LLM в формате Qwen2.5"""
+    prompt = f"""<|im_start|>system
+Ты - полезный ассистент, который отвечает на вопросы, используя только предоставленные документы.
+
+ПРАВИЛА:
+1. Отвечай ТОЛЬКО на основе информации из контекста.
+2. Если в контексте нет информации для ответа, скажи: "Я не могу найти ответ на этот вопрос в предоставленных документах."
+3. Не добавляй информацию из своих внутренних знаний.
+4. Отвечай кратко и по существу.
+5. Отвечай на русском языке.
+<|im_end|>
+<|im_start|>user
+КОНТЕКСТ:
+{context}
+
+ВОПРОС: {query}
+<|im_end|>
+<|im_start|>assistant
+"""
+    return prompt</code></pre>
+  <p><em>Формируется промпт в специальном формате Qwen2.5 с системными инструкциями, контекстом и вопросом пользователя, разделёнными токенами &lt;|im_start|&gt; и &lt;|im_end|&gt;.</em></p>
+</div>
+
+<!-- Шаг 6 -->
+<div class="practice-step">
+  <div class="practice-step-number">6</div>
+  <div class="practice-step-title">Метод генерации через локальную Ollama</div>
+  <pre><code class="language-python">def generate_local(self, prompt):
+    """Генерация ответа через локальную Ollama модель"""
+    try:
+        response = requests.post(
+            self.api_url,
+            json={
+                "model": self.model_name,
+                "prompt": prompt,
+                "stream": False,
+                "options": {
+                    "temperature": 0.7,
+                    "top_p": 0.8,
+                    "repeat_penalty": 1.05
+                }
+            },
+            timeout=120
+        )
+        
+        if response.status_code == 200:
+            return response.json()["response"]
+        else:
+            return f"Ошибка при обращении к Ollama: {response.status_code} - {response.text}"
+    except requests.exceptions.Timeout:
+        return "Ошибка: превышено время ожидания ответа от Ollama"
+    except requests.exceptions.ConnectionError:
+        return "Ошибка: не удалось подключиться к Ollama. Убедитесь, что сервер запущен (ollama serve)"</code></pre>
+  <p><em>Отправляется POST-запрос к локальному серверу Ollama с параметрами генерации (температура, top_p, penalty), обрабатываются возможные ошибки подключения и таймаута.</em></p>
+</div>
+
+<!-- Шаг 7 -->
+<div class="practice-step">
+  <div class="practice-step-number">7</div>
+  <div class="practice-step-title">Метод генерации через OpenAI API</div>
+  <pre><code class="language-python">def generate_openai(self, prompt):
+    """Генерация ответа через OpenAI API"""
+    response = self.client.chat.completions.create(
+        model=self.model_name,
+        messages=[{"role": "user", "content": prompt}],
+        temperature=0.7
+    )
+    return response.choices[0].message.content</code></pre>
+  <p><em>Отправляется запрос к OpenAI API с заданной температурой, возвращается текст ответа из первого выбранного варианта.</em></p>
+</div>
+
+<!-- Шаг 8 -->
+<div class="practice-step">
+  <div class="practice-step-number">8</div>
+  <div class="practice-step-title">Полный метод answer_question</div>
+  <pre><code class="language-python">def answer_question(self, query, n_results=3):
+    """Полный пайплайн: поиск + генерация"""
+    # Шаг 1: Поиск контекста
+    context, sources = self.get_context(query, n_results)
+    
+    # Шаг 2: Создание промпта
+    prompt = self.create_prompt(query, context)
+    
+    # Шаг 3: Генерация ответа
+    if self.use_local:
+        answer = self.generate_local(prompt)
+    else:
+        answer = self.generate_openai(prompt)
+    
+    return {
+        "question": query,
+        "answer": answer,
+        "sources": sources,
+        "context": context
+    }</code></pre>
+  <p><em>Объединяет все этапы RAG-пайплайна: поиск контекста, создание промпта, генерацию ответа (локально или через OpenAI) и возвращает результат в виде словаря с вопросом, ответом, источниками и контекстом.</em></p>
+  <img src="../images/image27.png" alt="Код RAGPipeline">
+</div>
+
+<!-- Шаг 9 -->
+<div class="practice-step">
+  <div class="practice-step-number">9</div>
+  <div class="practice-step-title">Создание тестового скрипта</div>
+  <p>Создайте файл <span class="file-link">scripts/test_rag.py</span>. Импортируйте модули и определите главную функцию:</p>
+  <pre><code class="language-python">from chroma_manager import ChromaVectorStore
+from rag_pipeline import RAGPipeline
+
+def main():
+    print("="*60)
+    print("Запуск RAG-системы с моделью Qwen2.5")
+    print("="*60)</code></pre>
+  <p><em>Импортируются классы для работы с векторной БД и RAG-пайплайном, затем определяется главная функция и выводится заголовок программы.</em></p>
+</div>
+
+<!-- Шаг 10 -->
+<div class="practice-step">
+  <div class="practice-step-number">10</div>
+  <div class="practice-step-title">Проверка подключения к Ollama</div>
+  <pre><code class="language-python">    # Проверка подключения к Ollama
+    import requests
+    try:
+        response = requests.get("http://localhost:11434/api/tags", timeout=5)
+        if response.status_code == 200:
+            models = response.json().get("models", [])
+            print(f"Ollama работает. Доступные модели: {[m['name'] for m in models]}")
+        else:
+            print("Предупреждение: Ollama отвечает, но с неожиданным кодом")
+    except requests.exceptions.ConnectionError:
+        print("ОШИБКА: Ollama не запущен!")
+        print("Запустите сервер в отдельном окне PowerShell: ollama serve")
+        return
+    except Exception as e:
+        print(f"Ошибка при проверке Ollama: {e}")</code></pre>
+  <p><em>Выполняется проверка доступности сервера Ollama через API-запрос. В случае успеха выводятся доступные модели, при ошибке подключения программа завершается с инструкцией по запуску сервера.</em></p>
+</div>
+
+<!-- Шаг 11 -->
+<div class="practice-step">
+  <div class="practice-step-number">11</div>
+  <div class="practice-step-title">Инициализация векторной базы данных</div>
+  <pre><code class="language-python">    # Инициализация компонентов
+    print("\nЗагрузка векторной базы данных...")
+    vector_store = ChromaVectorStore(
+        persist_directory="../data/chroma_db",
+        collection_name="rag_documents"
+    )</code></pre>
+  <p><em>Создаётся экземпляр класса ChromaVectorStore, который подключается к существующей базе данных в папке ../data/chroma_db и использует коллекцию rag_documents.</em></p>
+</div>
+
+<!-- Шаг 12 -->
+<div class="practice-step">
+  <div class="practice-step-number">12</div>
+  <div class="practice-step-title">Создание RAG-пайплайна</div>
+  <pre><code class="language-python">    # Создание RAG-пайплайна с Qwen2.5
+    # Для модели 1.5B: model_name="qwen2.5:3b"
+    # Для модели 7B: model_name="qwen2.5:7b"
+    rag = RAGPipeline(vector_store, use_local=True, model_name="qwen2.5:3b")</code></pre>
+  <p><em>Инициализируется RAG-пайплайн с локальной моделью Qwen2.5 версии 3b, которая будет использоваться для генерации ответов.</em></p>
+</div>
+
+<!-- Шаг 13 -->
+<div class="practice-step">
+  <div class="practice-step-number">13</div>
+  <div class="practice-step-title">Определение тестовых вопросов</div>
+  <pre><code class="language-python">    # Тестовые вопросы
+    questions = [
+        "Что такое искусственный интеллект?",
+        "Чем машинное обучение отличается от традиционного программирования?"
+    ]
+    
+    print("\n" + "="*60)
+    print("Начало тестирования")
+    print("="*60)</code></pre>
+  <p><em>Создаётся список из двух тестовых вопросов на русском языке и выводится заголовок начала тестирования.</em></p>
+</div>
+
+<!-- Шаг 14 -->
+<div class="practice-step">
+  <div class="practice-step-number">14</div>
+  <div class="practice-step-title">Цикл обработки вопросов и запуск главной функции</div>
+  <pre><code class="language-python">    for q in questions:
+        print(f"\nВопрос: {q}")
+        print("-"*40)
+        
+        try:
+            result = rag.answer_question(q)
+            
+            print(f"\nОтвет: {result['answer']}")
+            if result['sources']:
+                print(f"\nИсточники: {', '.join(result['sources'])}")
+        except Exception as e:
+            print(f"Ошибка при обработке вопроса: {e}")
+        
+        print("-"*60)
+
+if __name__ == "__main__":
+    main()</code></pre>
+  <p><em>Для каждого вопроса вызывается метод answer_question(), который выполняет поиск контекста и генерацию ответа. Результат выводится вместе с источниками информации. Блок if __name__ == "__main__" обеспечивает запуск главной функции при выполнении скрипта.</em></p>
+  <img src="../images/image28.png" alt="Тестовый скрипт RAG">
+</div>
+
+<!-- Шаг 15 -->
+<div class="practice-step">
+  <div class="practice-step-number">15</div>
+  <div class="practice-step-title">Запуск</div>
+  <p><strong>Откройте первое окно PowerShell</strong> и выполните:</p>
+  <div class="powershell-block copyable"><div class="powershell-block__bar"><span>PowerShell</span><button type="button" class="btn-copy">Копировать</button></div><pre><code>$env:OLLAMA_HOST="127.0.0.1:11435"
+ollama serve</code></pre></div>
+  <p><em>OLLAMA_HOST - это переменная окружения, которая указывает Ollama, на каком адресе и порту запускать сервер. По умолчанию Ollama использует порт 11434. Если порт уже занят, запускаем на порту 11435.</em></p>
+  <p><strong>Затем во втором окне PowerShell:</strong></p>
+  <div class="powershell-block copyable"><div class="powershell-block__bar"><span>PowerShell</span><button type="button" class="btn-copy">Копировать</button></div><pre><code>cd scripts
+python test_rag.py</code></pre></div>
+  <img src="../images/image29.png" alt="Запуск тестового скрипта">
+</div>
+
+<div class="practice-step">
+  <div class="practice-step-title">Что вы сделали в работе №4</div>
+  <ul>
+    <li>Настроили Ollama - запустили сервер с моделью Qwen2.5</li>
+    <li>Создали RAG-пайплайн - класс, который объединяет поиск и генерацию</li>
+    <li>Реализовали промпт для LLM - с инструкцией отвечать только на основе контекста</li>
+    <li>Протестировали систему - получили правильные ответы на вопросы</li>
+  </ul>
+</div>
+
+<h2>Задание для самостоятельного выполнения</h2>
+<ul>
+<li>Добавьте в класс RAGPipeline параметр temperature для управления креативностью ответов.</li>
+<li>Реализуйте сохранение истории диалога (question/answer пары в JSON файл).</li>
+<li>Попробуйте разные модели Ollama (например, llama3.2:1b для скорости или mistral для качества).</li>
+<li>Добавьте в ответ ссылки на источники в формате: [1], [2] прямо в тексте ответа.</li>
+</ul>
+
+<h2>Контрольные вопросы</h2>
+<ol>
+<li>Из каких двух основных этапов состоит RAG-пайплайн?</li>
+<li>В чём разница между локальной моделью (Ollama) и облачным API (OpenAI)?</li>
+<li>Почему в промпте важно указать "отвечай только на основе контекста"?</li>
+<li>Как передаётся контекст в языковую модель?</li>
+<li>Что произойдёт, если в контексте нет ответа на вопрос?</li>
+</ol>
+
+<h2>Критерии оценки</h2>
+<div class="criteria-table-wrap">
+  <table class="criteria-table">
+    <thead><tr><th>Критерий</th><th>Баллы</th></tr></thead>
+    <tbody>
+      <tr><td style="padding: 0.75rem 1rem;">Успешный запуск локальной модели (Ollama)</td><td style="text-align: center;">2</td></tr>
+      <tr><td style="padding: 0.75rem 1rem;">Создание RAG-пайплайна (поиск + генерация)</td><td style="text-align: center;">2</td></tr>
+      <tr><td style="padding: 0.75rem 1rem;">Корректная работа на тестовых вопросах</td><td style="text-align: center;">2</td></tr>
+      <tr><td style="padding: 0.75rem 1rem;">Обработка случая "ответ не найден"</td><td style="text-align: center;">2</td></tr>
+      <tr><td style="padding: 0.75rem 1rem;">Выполнено дополнительное задание</td><td style="text-align: center;">2</td></tr>
+    </tbody>
+  </table>
+</div>
+<p><strong>Максимальный балл: 10</strong></p>
+</section>
+
+<nav class="nav-prev-next"><a href="practice3.html">← Практика 3</a><a href="practice5.html">Практика 5 →</a></nav>
+</main>
+<footer class="site-footer">Практика 4</footer>
+<script src="../js/main.js"></script>
+</body>
+</html>

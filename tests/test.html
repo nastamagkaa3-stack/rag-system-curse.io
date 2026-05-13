@@ -1,0 +1,1024 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Итоговый тест — Разработка RAG-систем</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #f5f7fb;
+      color: #1a2a3a;
+      line-height: 1.5;
+    }
+    .site-header {
+      background: #1e3a5f;
+      color: white;
+      padding: 1rem 0;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    .header-inner {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 0 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .logo {
+      font-size: 1.5rem;
+      font-weight: 700;
+      text-decoration: none;
+      color: white;
+    }
+    .logo span { font-weight: 400; opacity: 0.9; }
+    .nav-desktop { display: flex; gap: 1.5rem; }
+    .nav-desktop a, .nav-mobile a { color: white; text-decoration: none; opacity: 0.9; }
+    .nav-desktop a:hover, .nav-mobile a:hover { opacity: 1; }
+    .menu-toggle { display: none; background: none; border: none; color: white; font-size: 1.2rem; cursor: pointer; }
+    .nav-mobile { display: none; flex-direction: column; background: #1e3a5f; padding: 1rem; gap: 0.75rem; }
+    .nav-mobile.open { display: flex; }
+    @media (max-width: 768px) { .nav-desktop { display: none; } .menu-toggle { display: block; } }
+    main { max-width: 1000px; margin: 0 auto; padding: 1rem 20px; }
+    .breadcrumb { font-size: 0.85rem; color: #666; margin-bottom: 1rem; }
+    .breadcrumb a { color: #1e3a5f; text-decoration: none; }
+    .progress-wrap {
+      background: white;
+      border-radius: 12px;
+      padding: 1rem;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    .progress-label { display: flex; justify-content: space-between; margin-bottom: 0.5rem; font-size: 0.9rem; }
+    .progress-track { background: #e0e0e0; border-radius: 8px; height: 8px; overflow: hidden; }
+    .progress-fill { background: #1e3a5f; width: 0%; height: 100%; transition: width 0.3s; }
+    .quiz-card {
+      background: white;
+      border-radius: 16px;
+      padding: 1.5rem;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      margin-bottom: 1rem;
+    }
+    .question-type-badge {
+      display: inline-block;
+      background: #e2e8f0;
+      padding: 0.2rem 0.6rem;
+      border-radius: 20px;
+      font-size: 0.7rem;
+      font-weight: 600;
+      color: #1e3a5f;
+      margin-bottom: 0.75rem;
+    }
+    .question-text { font-size: 1.2rem; font-weight: 500; margin: 0.5rem 0 1rem 0; line-height: 1.4; }
+    .quiz-option {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.75rem;
+      margin: 0.5rem 0;
+      border: 1px solid #e0e0e0;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .quiz-option:hover { background: #f5f7fb; }
+    .quiz-option input { cursor: pointer; width: 18px; height: 18px; }
+    .quiz-hint { font-size: 0.8rem; color: #666; margin-top: 0.75rem; padding-top: 0.5rem; border-top: 1px solid #eee; }
+    .open-answer-input, .short-answer-input {
+      width: 100%;
+      padding: 0.75rem;
+      border: 1px solid #e0e0e0;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-family: inherit;
+      margin: 0.5rem 0;
+    }
+    .open-answer-input:focus, .short-answer-input:focus {
+      outline: none;
+      border-color: #1e3a5f;
+    }
+    .match-row {
+      display: flex;
+      gap: 1rem;
+      margin: 0.75rem 0;
+      padding: 0.5rem;
+      background: #f8fafc;
+      border-radius: 8px;
+      align-items: center;
+    }
+    .match-left {
+      flex: 1;
+      font-weight: 500;
+    }
+    .match-right {
+      flex: 1;
+    }
+    .match-right select {
+      width: 100%;
+      padding: 0.5rem;
+      border-radius: 6px;
+      border: 1px solid #e0e0e0;
+      font-family: inherit;
+    }
+    .sequence-items {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    .sequence-item {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.5rem;
+      background: #f8fafc;
+      border-radius: 8px;
+      cursor: move;
+    }
+    .sequence-item.dragging { opacity: 0.4; }
+    .sequence-handle {
+      cursor: grab;
+      color: #999;
+    }
+    .sequence-number {
+      width: 28px;
+      height: 28px;
+      background: #e2e8f0;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+    .quiz-actions { display: flex; justify-content: space-between; align-items: center; gap: 1rem; }
+    .btn {
+      padding: 0.6rem 1.5rem;
+      border: none;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-primary { background: #1e3a5f; color: white; }
+    .btn-primary:hover { background: #2c5282; }
+    .btn-secondary { background: #e2e8f0; color: #1a2a3a; }
+    .btn-secondary:hover { background: #cbd5e0; }
+    .saved-hint { font-size: 0.8rem; color: #2e7d32; opacity: 0.7; }
+    .results-header { text-align: center; margin-bottom: 2rem; }
+    .results-score { font-size: 2rem; font-weight: 700; color: #1e3a5f; margin: 0.5rem 0; }
+    .results-percentage { font-size: 1.2rem; color: #2c6e9e; }
+    .results-grade { font-size: 1.5rem; font-weight: 700; margin-top: 0.5rem; }
+    .results-details { background: white; border-radius: 16px; padding: 1.5rem; }
+    .result-item { border-bottom: 1px solid #e0e0e0; padding: 1rem 0; }
+    .result-item:last-child { border-bottom: none; }
+    .site-footer { text-align: center; padding: 1.5rem; color: #666; font-size: 0.85rem; border-top: 1px solid #e0e0e0; margin-top: 2rem; }
+    .correct-answer-hint { font-size: 0.85rem; color: #1565c0; margin-top: 0.25rem; }
+    .question-note { background: #fef3c7; padding: 0.5rem; border-radius: 8px; margin: 0.5rem 0; font-size: 0.85rem; }
+    @media (max-width: 640px) {
+      .match-row { flex-direction: column; align-items: stretch; }
+      .quiz-actions { flex-wrap: wrap; }
+    }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <div class="header-inner">
+      <a class="logo" href="../index.html">RAG <span>курс</span></a>
+      <nav class="nav-desktop">
+        <a href="../index.html">Главная</a>
+        <a href="../lectures/lecture1.html">Лекции</a>
+        <a href="../practices/practice1.html">Практики</a>
+        <a href="../tests/test.html">Тест</a>
+      </nav>
+      <button type="button" class="menu-toggle" aria-expanded="false" aria-label="Меню">Меню</button>
+    </div>
+    <nav class="nav-mobile">
+      <a href="../index.html">Главная</a>
+      <a href="../lectures/lecture1.html">Лекции</a>
+      <a href="../practices/practice1.html">Практики</a>
+      <a href="../tests/test.html">Тест</a>
+    </nav>
+  </header>
+  
+  <main>
+    <nav class="breadcrumb"><a href="index.html">Главная</a> / Тест</nav>
+
+    <section id="view-quiz">
+      <div class="progress-wrap">
+        <div class="progress-label">
+          <span>Прогресс: <strong id="progress-num">0</strong> из <span id="total-questions">0</span></span>
+          <span id="question-num"></span>
+        </div>
+        <div class="progress-track"><div class="progress-fill" id="progress-fill"></div></div>
+      </div>
+      <div class="quiz-card" id="question-body"></div>
+      <div class="quiz-actions">
+        <button type="button" class="btn btn-secondary" id="btn-prev" style="display: none;">Назад</button>
+        <span class="saved-hint" id="saved-hint">Автосохранение</span>
+        <div>
+          <button type="button" class="btn btn-primary" id="btn-next">Далее</button>
+          <button type="button" class="btn btn-primary" id="btn-finish" style="display: none;">Завершить</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="view-results" style="display: none;">
+      <div id="results-content"></div>
+      <div class="quiz-actions" style="margin-top: 1.5rem; justify-content: center;">
+        <button type="button" class="btn btn-secondary" id="btn-restart">Пройти заново</button>
+      </div>
+    </section>
+  </main>
+  
+  <footer class="site-footer">Итоговый тест · Разработка RAG-систем</footer>
+
+  <script>
+    // ==================== ВОПРОСЫ ====================
+    // single - один вариант ответа
+    // multiple - множественный выбор
+    // match - установление соответствия
+    // sequence - установление последовательности
+    // short - краткий ответ (словосочетание)
+    // phrase - развёрнутый ответ (словосочетание/короткая фраза)
+
+    const questions = [
+      // SINGLE (1 вариант) - вопросы 1-8
+      {
+        id: 1,
+        type: "single",
+        text: "Что означает аббревиатура RAG?",
+        options: [
+          "Recursive Array Generator",
+          "Retrieval-Augmented Generation",
+          "Reinforced Attention Gradient",
+          "Random Access Gateway"
+        ],
+        correct: 1
+      },
+      {
+        id: 2,
+        type: "single",
+        text: "Какую основную проблему LLM решает RAG?",
+        options: [
+          "Низкую скорость обработки",
+          "Галлюцинации и устаревшие знания",
+          "Высокое энергопотребление",
+          "Сложность установки"
+        ],
+        correct: 1
+      },
+      {
+        id: 3,
+        type: "single",
+        text: "Что такое эмбеддинги в контексте RAG?",
+        options: [
+          "Сжатые изображения документов",
+          "Векторные представления текста",
+          "Зашифрованные фрагменты данных",
+          "Аудиозаписи лекций"
+        ],
+        correct: 1
+      },
+      {
+        id: 4,
+        type: "single",
+        text: "Какая метрика чаще всего используется для оценки сходства эмбеддингов?",
+        options: [
+          "Евклидово расстояние",
+          "Косинусное сходство",
+          "Манхэттенское расстояние",
+          "Расстояние Чебышёва"
+        ],
+        correct: 1
+      },
+      {
+        id: 5,
+        type: "single",
+        text: "Какая векторная база данных используется в курсе?",
+        options: [
+          "MySQL",
+          "PostgreSQL",
+          "ChromaDB",
+          "MongoDB"
+        ],
+        correct: 2
+      },
+      {
+        id: 6,
+        type: "single",
+        text: "Что делает параметр температура (temperature) в LLM?",
+        options: [
+          "Управляет креативностью и случайностью ответов",
+          "Ускоряет генерацию текста",
+          "Уменьшает размер модели",
+          "Шифрует выходные данные"
+        ],
+        correct: 0
+      },
+      {
+        id: 7,
+        type: "single",
+        text: "Какой порт использует Ollama по умолчанию?",
+        options: ["8000", "8501", "11434", "8080"],
+        correct: 2
+      },
+      {
+        id: 8,
+        type: "single",
+        text: "Что такое галлюцинация LLM?",
+        options: [
+          "Сбой при загрузке модели",
+          "Генерация уверенных, но ложных фактов",
+          "Переполнение буфера памяти",
+          "Проблема с кодировкой символов"
+        ],
+        correct: 1
+      },
+
+      // MULTIPLE (множественный выбор) - вопросы 9-12
+      {
+        id: 9,
+        type: "multiple",
+        text: "Какие компоненты входят в классическую RAG-систему? (Выберите все подходящие)",
+        options: [
+          "Retriever (модуль поиска)",
+          "Generator (модуль генерации)",
+          "Tokenizer (токенизатор)",
+          "Vector Database (векторная база данных)"
+        ],
+        correct: [0, 1, 3]
+      },
+      {
+        id: 10,
+        type: "multiple",
+        text: "Какие библиотеки Python используются для создания эмбеддингов? (Выберите все)",
+        options: [
+          "sentence-transformers",
+          "transformers",
+          "django",
+          "flask"
+        ],
+        correct: [0, 1]
+      },
+      {
+        id: 11,
+        type: "multiple",
+        text: "Какие форматы документов поддерживает система загрузки в курсе?",
+        options: ["TXT", "PDF", "DOCX", "MP3", "JPG"],
+        correct: [0, 1, 2]
+      },
+      {
+        id: 12,
+        type: "multiple",
+        text: "Какие методы можно использовать для улучшения качества поиска в RAG?",
+        options: [
+          "Переранжирование (reranking)",
+          "Гибридный поиск",
+          "Уменьшение chunk_size до 50 символов",
+          "Использование метаданных"
+        ],
+        correct: [0, 1, 3]
+      },
+
+      // MATCH (установление соответствия) - вопросы 13-16
+      {
+        id: 13,
+        type: "match",
+        text: "Установите соответствие между термином и его определением:",
+        pairs: [
+          { left: "Chunking", right: "Разбиение текста на фрагменты", options: ["Разбиение текста на фрагменты", "Векторное представление слова", "Поиск похожих документов", "Генерация ответа"] },
+          { left: "Embedding", right: "Векторное представление текста", options: ["Разбиение текста на фрагменты", "Векторное представление слова", "Поиск похожих документов", "Генерация ответа"] },
+          { left: "Retrieval", right: "Поиск релевантных документов", options: ["Разбиение текста на фрагменты", "Векторное представление слова", "Поиск похожих документов", "Генерация ответа"] },
+          { left: "Generation", right: "Создание ответа на основе найденного", options: ["Разбиение текста на фрагменты", "Векторное представление слова", "Поиск похожих документов", "Генерация ответа"] }
+        ],
+        correct: [0, 1, 2, 3]
+      },
+      {
+        id: 14,
+        type: "match",
+        text: "Сопоставьте тип эмбеддинга с его характеристикой:",
+        pairs: [
+          { left: "Статические (Word2Vec)", right: "Одно представление у слова", options: ["Одно представление у слова", "Разное представление в зависимости от контекста", "Учитывает порядок слов", "Работает только с русским"] },
+          { left: "Контекстуальные (BERT)", right: "Разное представление в зависимости от контекста", options: ["Одно представление у слова", "Разное представление в зависимости от контекста", "Учитывает порядок слов", "Работает только с русским"] }
+        ],
+        correct: [0, 1]
+      },
+      {
+        id: 15,
+        type: "match",
+        text: "Установите соответствие библиотека - назначение:",
+        pairs: [
+          { left: "Streamlit", right: "Веб-интерфейс", options: ["Веб-интерфейс", "Работа с PDF", "Векторная БД", "Эмбеддинги"] },
+          { left: "ChromaDB", right: "Векторная БД", options: ["Веб-интерфейс", "Работа с PDF", "Векторная БД", "Эмбеддинги"] },
+          { left: "sentence-transformers", right: "Эмбеддинги", options: ["Веб-интерфейс", "Работа с PDF", "Векторная БД", "Эмбеддинги"] },
+          { left: "PyPDF2", right: "Работа с PDF", options: ["Веб-интерфейс", "Работа с PDF", "Векторная БД", "Эмбеддинги"] }
+        ],
+        correct: [0, 2, 3, 1]
+      },
+      {
+        id: 16,
+        type: "match",
+        text: "Сопоставьте параметр чанкинга с его значением:",
+        pairs: [
+          { left: "chunk_size", right: "Максимальный размер фрагмента", options: ["Максимальный размер фрагмента", "Перекрытие между фрагментами", "Минимальный размер фрагмента", "Количество фрагментов"] },
+          { left: "chunk_overlap", right: "Перекрытие между фрагментами", options: ["Максимальный размер фрагмента", "Перекрытие между фрагментами", "Минимальный размер фрагмента", "Количество фрагментов"] }
+        ],
+        correct: [0, 1]
+      },
+
+      // SEQUENCE (установление последовательности) - вопросы 17-20
+      {
+        id: 17,
+        type: "sequence",
+        text: "Расположите этапы работы RAG-системы в правильном порядке:",
+        items: ["Генерация ответа LLM", "Поиск релевантных фрагментов", "Индексация документов и создание эмбеддингов", "Формирование промпта с найденными фрагментами"],
+        correct: [2, 1, 3, 0]
+      },
+      {
+        id: 18,
+        type: "sequence",
+        text: "Установите правильную последовательность создания RAG-приложения:",
+        items: ["Установка библиотек", "Загрузка и чанкинг документов", "Создание эмбеддингов и векторной БД", "Реализация поиска", "Интеграция с LLM", "Создание веб-интерфейса"],
+        correct: [0, 1, 2, 3, 4, 5]
+      },
+      {
+        id: 19,
+        type: "sequence",
+        text: "Расположите шаги по обработке нового документа в RAG-системе:",
+        items: ["Разбить на фрагменты", "Загрузить документ", "Сгенерировать эмбеддинги", "Сохранить в векторную БД"],
+        correct: [1, 0, 2, 3]
+      },
+      {
+        id: 20,
+        type: "sequence",
+        text: "Порядок действий при возникновении ошибки в Python-скрипте:",
+        items: ["Прочитать сообщение об ошибке", "Найти строку с ошибкой", "Проверить тип ошибки", "Исправить код", "Перезапустить скрипт"],
+        correct: [0, 2, 1, 3, 4]
+      },
+
+      // SHORT (краткий ответ - словосочетание) - вопросы 21-25
+      {
+        id: 21,
+        type: "short",
+        text: "Команда для создания виртуального окружения Python (напишите словосочетание):",
+        correctKeywords: ["python -m venv venv", "venv"]
+      },
+      {
+        id: 22,
+        type: "short",
+        text: "Как активировать виртуальное окружение в Windows (путь относительно папки проекта):",
+        correctKeywords: [".\\venv\\Scripts\\activate", "venv\\Scripts\\activate"]
+      },
+      {
+        id: 23,
+        type: "short",
+        text: "Название модели для русскоязычных эмбеддингов из курса:",
+        correctKeywords: ["cointegrated/rubert-tiny2", "rubert-tiny2"]
+      },
+      {
+        id: 24,
+        type: "short",
+        text: "Какой порт использует Streamlit по умолчанию?",
+        correctKeywords: ["8501"]
+      },
+      {
+        id: 25,
+        type: "short",
+        text: "Команда для установки библиотеки streamlit:",
+        correctKeywords: ["pip install streamlit"]
+      },
+
+      // PHRASE (развёрнутый ответ - словосочетание/короткая фраза) - вопросы 26-30
+      {
+        id: 26,
+        type: "phrase",
+        text: "В чем различие между RAG и дообучением (fine-tuning) модели? (Ответ в виде одного предложения)",
+        correctKeywords: ["RAG использует внешнюю базу знаний", "fine-tuning изменяет веса модели", "RAG не требует переобучения"]
+      },
+      {
+        id: 27,
+        type: "phrase",
+        text: "Какие метрики используются для оценки качества поиска в RAG? (Назовите 2-3 метрики словосочетаниями)",
+        correctKeywords: ["hit rate", "MRR", "Recall@k", "точность поиска", "релевантность"]
+      },
+      {
+        id: 28,
+        type: "phrase",
+        text: "Какие проблемы возникают при масштабировании RAG на миллионы документов? (Одна короткая фраза)",
+        correctKeywords: ["скорость поиска", "потребление памяти", "стоимость хранения", "лаг"]
+      },
+      {
+        id: 29,
+        type: "phrase",
+        text: "Что означают параметры chunk_size и chunk_overlap? (Одно предложение)",
+        correctKeywords: ["chunk_size размер фрагмента", "chunk_overlap перекрытие между фрагментами", "сохранение контекста"]
+      },
+      {
+        id: 30,
+        type: "phrase",
+        text: "Как запустить Streamlit-приложение из файла app.py? (Напишите команду словосочетанием)",
+        correctKeywords: ["streamlit run app.py"]
+      }
+    ];
+
+    let userAnswers = [];
+    let currentIndex = 0;
+    let sequenceOrders = {};
+    let matchAnswers = {};
+
+    const viewQuiz = document.getElementById('view-quiz');
+    const viewResults = document.getElementById('view-results');
+    const questionBody = document.getElementById('question-body');
+    const progressNum = document.getElementById('progress-num');
+    const totalQuestionsSpan = document.getElementById('total-questions');
+    const questionNumSpan = document.getElementById('question-num');
+    const progressFill = document.getElementById('progress-fill');
+    const btnPrev = document.getElementById('btn-prev');
+    const btnNext = document.getElementById('btn-next');
+    const btnFinish = document.getElementById('btn-finish');
+    const btnRestart = document.getElementById('btn-restart');
+    const resultsContent = document.getElementById('results-content');
+    const savedHint = document.getElementById('saved-hint');
+
+    const menuToggle = document.querySelector('.menu-toggle');
+    const navMobile = document.querySelector('.nav-mobile');
+    if (menuToggle) {
+      menuToggle.addEventListener('click', () => navMobile.classList.toggle('open'));
+    }
+
+    function getTypeName(type) {
+      const names = { single: "Один вариант", multiple: "Несколько вариантов", match: "Соответствие", sequence: "Последовательность", short: "Краткий ответ", phrase: "Ответ словосочетанием" };
+      return names[type] || type;
+    }
+
+    function startQuiz() {
+      userAnswers = new Array(questions.length).fill(null);
+      sequenceOrders = {};
+      matchAnswers = {};
+      loadSavedAnswers();
+      totalQuestionsSpan.textContent = questions.length;
+      updateProgress();
+      currentIndex = 0;
+      renderQuestion();
+      viewQuiz.style.display = 'block';
+      viewResults.style.display = 'none';
+    }
+
+    function loadSavedAnswers() {
+      const saved = localStorage.getItem('rag_quiz_no_emoji');
+      if (saved) {
+        try {
+          const parsed = JSON.parse(saved);
+          if (parsed.userAnswers && Array.isArray(parsed.userAnswers) && parsed.userAnswers.length === questions.length) {
+            userAnswers = parsed.userAnswers;
+          }
+          if (parsed.sequenceOrders) sequenceOrders = parsed.sequenceOrders;
+          if (parsed.matchAnswers) matchAnswers = parsed.matchAnswers;
+        } catch(e) {}
+      }
+    }
+
+    function saveAnswers() {
+      const saveData = { userAnswers, sequenceOrders, matchAnswers };
+      localStorage.setItem('rag_quiz_no_emoji', JSON.stringify(saveData));
+      savedHint.style.opacity = '1';
+      setTimeout(() => savedHint.style.opacity = '0.7', 1000);
+    }
+
+    function getAnsweredCount() {
+      let count = 0;
+      for (let i = 0; i < questions.length; i++) {
+        const q = questions[i];
+        const ans = userAnswers[i];
+        if (ans === null || ans === undefined || ans === '') continue;
+        if (q.type === 'match') {
+          if (matchAnswers[i] && Object.keys(matchAnswers[i]).length === q.pairs.length) count++;
+        } else if (q.type === 'sequence') {
+          if (sequenceOrders[i] && sequenceOrders[i].length === q.items.length) count++;
+        } else if (q.type === 'single') {
+          if (ans !== null && ans !== undefined) count++;
+        } else if (q.type === 'multiple') {
+          if (Array.isArray(ans) && ans.length > 0) count++;
+        } else if (ans && ans.trim() !== '') count++;
+      }
+      return count;
+    }
+
+    function updateProgress() {
+      const answered = getAnsweredCount();
+      progressNum.textContent = answered;
+      const percent = (answered / questions.length) * 100;
+      progressFill.style.width = `${percent}%`;
+    }
+
+    function renderQuestion() {
+      if (!questions.length || currentIndex >= questions.length) return;
+      const q = questions[currentIndex];
+      const currentAnswer = userAnswers[currentIndex];
+      
+      let html = `<div class="question-type-badge">${getTypeName(q.type)}</div>`;
+      html += `<p class="question-text">${escapeHtml(q.text)}</p>`;
+      
+      if (q.type === 'single') {
+        html += `<div class="quiz-options">`;
+        q.options.forEach((opt, idx) => {
+          const letter = String.fromCharCode(65 + idx);
+          const isChecked = (currentAnswer === idx);
+          html += `<label class="quiz-option"><input type="radio" name="question" value="${idx}" ${isChecked ? 'checked' : ''}><span><strong>${letter}.</strong> ${escapeHtml(opt)}</span></label>`;
+        });
+        html += `</div>`;
+      } 
+      else if (q.type === 'multiple') {
+        const selectedSet = currentAnswer ? new Set(currentAnswer) : new Set();
+        html += `<div class="quiz-options">`;
+        q.options.forEach((opt, idx) => {
+          const letter = String.fromCharCode(65 + idx);
+          const isChecked = selectedSet.has(idx);
+          html += `<label class="quiz-option"><input type="checkbox" name="question" value="${idx}" ${isChecked ? 'checked' : ''}><span><strong>${letter}.</strong> ${escapeHtml(opt)}</span></label>`;
+        });
+        html += `<div class="quiz-hint">Выберите все подходящие варианты</div></div>`;
+      }
+      else if (q.type === 'match') {
+        const savedMatches = matchAnswers[currentIndex] || {};
+        html += `<div class="match-container">`;
+        q.pairs.forEach((pair, idx) => {
+          const selected = savedMatches[idx] || '';
+          html += `<div class="match-row">
+            <div class="match-left">${escapeHtml(pair.left)}</div>
+            <div class="match-right">
+              <select data-match-idx="${idx}">
+                <option value="">-- выберите соответствие --</option>`;
+          pair.options.forEach(opt => {
+            html += `<option value="${escapeHtml(opt)}" ${selected === opt ? 'selected' : ''}>${escapeHtml(opt)}</option>`;
+          });
+          html += `</select></div></div>`;
+        });
+        html += `<div class="quiz-hint">К каждому элементу слева подберите правильный вариант из списка</div></div>`;
+      }
+      else if (q.type === 'sequence') {
+        const currentOrder = sequenceOrders[currentIndex] || [...q.items];
+        html += `<div class="sequence-items" id="sequence-container">`;
+        currentOrder.forEach((item, idx) => {
+          html += `<div class="sequence-item" draggable="true" data-idx="${idx}">
+            <span class="sequence-handle">⋮⋮</span>
+            <span class="sequence-number">${idx + 1}</span>
+            <span>${escapeHtml(item)}</span>
+          </div>`;
+        });
+        html += `</div><div class="quiz-hint">Перетащите строки мышкой, чтобы установить правильный порядок</div>`;
+      }
+      else if (q.type === 'short') {
+        html += `<input type="text" class="short-answer-input" id="short-answer" placeholder="Введите ответ словосочетанием" value="${escapeHtml(currentAnswer || '')}">`;
+        html += `<div class="quiz-hint">Напишите краткий ответ (команду, термин или название)</div>`;
+      }
+      else if (q.type === 'phrase') {
+        html += `<input type="text" class="short-answer-input" id="phrase-answer" placeholder="Введите ответ словосочетанием или короткой фразой" value="${escapeHtml(currentAnswer || '')}">`;
+        html += `<div class="quiz-hint">Напишите ответ в виде словосочетания или одного предложения</div>`;
+      }
+      
+      questionBody.innerHTML = html;
+      questionNumSpan.textContent = `Вопрос ${currentIndex + 1} из ${questions.length}`;
+      btnPrev.style.display = currentIndex === 0 ? 'none' : 'inline-flex';
+      
+      if (currentIndex === questions.length - 1) {
+        btnNext.style.display = 'none';
+        btnFinish.style.display = 'inline-flex';
+      } else {
+        btnNext.style.display = 'inline-flex';
+        btnFinish.style.display = 'none';
+      }
+      
+      attachAnswerHandlers(q);
+    }
+
+    function attachAnswerHandlers(q) {
+      if (q.type === 'single' || q.type === 'multiple') {
+        const inputs = questionBody.querySelectorAll('input');
+        inputs.forEach(input => {
+          input.addEventListener('change', () => saveCurrentAnswer());
+        });
+      } 
+      else if (q.type === 'match') {
+        const selects = questionBody.querySelectorAll('select');
+        selects.forEach(select => {
+          select.addEventListener('change', () => saveCurrentAnswer());
+        });
+      }
+      else if (q.type === 'short') {
+        const input = document.getElementById('short-answer');
+        if (input) input.addEventListener('input', () => saveCurrentAnswer());
+      }
+      else if (q.type === 'phrase') {
+        const input = document.getElementById('phrase-answer');
+        if (input) input.addEventListener('input', () => saveCurrentAnswer());
+      }
+      else if (q.type === 'sequence') {
+        initDragAndDrop();
+      }
+    }
+
+    function initDragAndDrop() {
+      const container = document.getElementById('sequence-container');
+      if (!container) return;
+      let dragSrcIndex = null;
+      const items = container.querySelectorAll('.sequence-item');
+      
+      items.forEach(item => {
+        item.addEventListener('dragstart', (e) => {
+          dragSrcIndex = parseInt(item.dataset.idx);
+          e.dataTransfer.effectAllowed = 'move';
+          item.classList.add('dragging');
+        });
+        item.addEventListener('dragend', (e) => {
+          item.classList.remove('dragging');
+        });
+        item.addEventListener('dragover', (e) => {
+          e.preventDefault();
+          e.dataTransfer.dropEffect = 'move';
+        });
+        item.addEventListener('drop', (e) => {
+          e.preventDefault();
+          const dragTarget = e.target.closest('.sequence-item');
+          if (!dragTarget) return;
+          const dragTargetIndex = parseInt(dragTarget.dataset.idx);
+          if (dragSrcIndex === dragTargetIndex) return;
+          
+          const itemsArray = Array.from(container.querySelectorAll('.sequence-item'));
+          const draggedItem = itemsArray[dragSrcIndex];
+          const targetItem = itemsArray[dragTargetIndex];
+          
+          if (dragSrcIndex < dragTargetIndex) {
+            targetItem.insertAdjacentElement('afterend', draggedItem);
+          } else {
+            targetItem.insertAdjacentElement('beforebegin', draggedItem);
+          }
+          
+          updateSequenceIndexes();
+          saveCurrentAnswer();
+        });
+      });
+    }
+
+    function updateSequenceIndexes() {
+      const container = document.getElementById('sequence-container');
+      if (!container) return;
+      const items = container.querySelectorAll('.sequence-item');
+      const newOrder = [];
+      items.forEach((item, idx) => {
+        item.dataset.idx = idx;
+        const numberSpan = item.querySelector('.sequence-number');
+        if (numberSpan) numberSpan.textContent = idx + 1;
+        const textSpan = item.querySelector('span:last-child');
+        if (textSpan) newOrder.push(textSpan.textContent);
+      });
+      sequenceOrders[currentIndex] = newOrder;
+    }
+
+    function saveCurrentAnswer() {
+      const q = questions[currentIndex];
+      
+      if (q.type === 'single') {
+        const inputs = questionBody.querySelectorAll('input[type="radio"]');
+        for (let i = 0; i < inputs.length; i++) {
+          if (inputs[i].checked) {
+            userAnswers[currentIndex] = parseInt(inputs[i].value);
+            break;
+          }
+        }
+      } 
+      else if (q.type === 'multiple') {
+        const inputs = questionBody.querySelectorAll('input[type="checkbox"]');
+        const selected = [];
+        inputs.forEach(input => {
+          if (input.checked) selected.push(parseInt(input.value));
+        });
+        userAnswers[currentIndex] = selected.length > 0 ? selected : null;
+      }
+      else if (q.type === 'match') {
+        const selects = questionBody.querySelectorAll('select');
+        const matches = {};
+        selects.forEach((select, idx) => {
+          if (select.value) matches[idx] = select.value;
+        });
+        matchAnswers[currentIndex] = Object.keys(matches).length > 0 ? matches : null;
+        userAnswers[currentIndex] = matchAnswers[currentIndex] ? 'filled' : null;
+      }
+      else if (q.type === 'sequence') {
+        if (sequenceOrders[currentIndex] && sequenceOrders[currentIndex].length === q.items.length) {
+          userAnswers[currentIndex] = sequenceOrders[currentIndex];
+        } else {
+          userAnswers[currentIndex] = null;
+        }
+      }
+      else if (q.type === 'short') {
+        const input = document.getElementById('short-answer');
+        if (input) userAnswers[currentIndex] = input.value.trim() || null;
+      }
+      else if (q.type === 'phrase') {
+        const input = document.getElementById('phrase-answer');
+        if (input) userAnswers[currentIndex] = input.value.trim() || null;
+      }
+      
+      updateProgress();
+      saveAnswers();
+    }
+
+    function nextQuestion() {
+      saveCurrentAnswer();
+      if (currentIndex < questions.length - 1) {
+        currentIndex++;
+        renderQuestion();
+      }
+    }
+
+    function prevQuestion() {
+      saveCurrentAnswer();
+      if (currentIndex > 0) {
+        currentIndex--;
+        renderQuestion();
+      }
+    }
+
+    function checkTextAnswer(userAnswer, correctKeywords) {
+      if (!userAnswer || userAnswer.trim() === '') return false;
+      const lowerAnswer = userAnswer.toLowerCase();
+      return correctKeywords.some(keyword => 
+        lowerAnswer.includes(keyword.toLowerCase())
+      );
+    }
+
+    function checkMatchAnswer(q, savedMatches) {
+      if (!savedMatches) return false;
+      for (let i = 0; i < q.pairs.length; i++) {
+        if (savedMatches[i] !== q.pairs[i].right) return false;
+      }
+      return true;
+    }
+
+    function checkSequenceAnswer(q, savedOrder) {
+      if (!savedOrder) return false;
+      for (let i = 0; i < q.correct.length; i++) {
+        if (savedOrder[i] !== q.items[q.correct[i]]) return false;
+      }
+      return true;
+    }
+
+    function getGradeLetter(percentage) {
+      if (percentage >= 90) return { letter: "A", description: "отлично" };
+      if (percentage >= 80) return { letter: "B", description: "хорошо" };
+      if (percentage >= 70) return { letter: "C", description: "удовлетворительно" };
+      if (percentage >= 60) return { letter: "D", description: "посредственно" };
+      return { letter: "E", description: "неудовлетворительно" };
+    }
+
+    function finishQuiz() {
+      saveCurrentAnswer();
+      
+      let correctCount = 0;
+      const results = [];
+      
+      questions.forEach((q, idx) => {
+        const userAnswer = userAnswers[idx];
+        let isCorrect = false;
+        let userAnswerText = '';
+        let correctAnswerText = '';
+        
+        if (q.type === 'single') {
+          if (userAnswer !== null && userAnswer !== undefined) {
+            userAnswerText = q.options[userAnswer];
+            isCorrect = (userAnswer === q.correct);
+            correctAnswerText = q.options[q.correct];
+          } else {
+            userAnswerText = "Не отвечен";
+          }
+        } 
+        else if (q.type === 'multiple') {
+          if (userAnswer && Array.isArray(userAnswer) && userAnswer.length > 0) {
+            const correctSet = new Set(q.correct);
+            const userSet = new Set(userAnswer);
+            isCorrect = userSet.size === correctSet.size && [...userSet].every(v => correctSet.has(v));
+            userAnswerText = userAnswer.map(i => q.options[i]).join(', ');
+            correctAnswerText = q.correct.map(i => q.options[i]).join(', ');
+          } else {
+            userAnswerText = "Не отвечен";
+          }
+        }
+        else if (q.type === 'match') {
+          const savedMatches = matchAnswers[idx];
+          if (savedMatches && Object.keys(savedMatches).length === q.pairs.length) {
+            isCorrect = checkMatchAnswer(q, savedMatches);
+            userAnswerText = Object.values(savedMatches).join('; ');
+            correctAnswerText = q.pairs.map(p => `${p.left} -> ${p.right}`).join('; ');
+          } else {
+            userAnswerText = "Не отвечен";
+          }
+        }
+        else if (q.type === 'sequence') {
+          const savedOrder = sequenceOrders[idx];
+          if (savedOrder && savedOrder.length === q.items.length) {
+            isCorrect = checkSequenceAnswer(q, savedOrder);
+            userAnswerText = savedOrder.join(' -> ');
+            correctAnswerText = q.correct.map(i => q.items[i]).join(' -> ');
+          } else {
+            userAnswerText = "Не отвечен";
+          }
+        }
+        else if (q.type === 'short' || q.type === 'phrase') {
+          if (userAnswer && userAnswer.trim() !== '') {
+            isCorrect = checkTextAnswer(userAnswer, q.correctKeywords);
+            userAnswerText = userAnswer;
+            correctAnswerText = q.correctKeywords.join(' или ');
+          } else {
+            userAnswerText = "Не отвечен";
+          }
+        }
+        
+        if (isCorrect) correctCount++;
+        
+        results.push({
+          question: q.text,
+          type: getTypeName(q.type),
+          userAnswer: userAnswerText,
+          isCorrect: isCorrect,
+          correctAnswer: correctAnswerText
+        });
+      });
+      
+      const percentage = Math.round((correctCount / questions.length) * 100);
+      const grade = getGradeLetter(percentage);
+      
+      let resultsHtml = `
+        <div class="results-header">
+          <h2>Результаты тестирования</h2>
+          <div class="results-score">${correctCount} из ${questions.length} правильных ответов</div>
+          <div class="results-percentage">${percentage}%</div>
+          <div class="results-grade">Оценка: ${grade.letter} (${grade.description})</div>
+        </div>
+        <div class="results-details">
+          <h3>Детальный разбор:</h3>
+      `;
+      
+      results.forEach((res, idx) => {
+        resultsHtml += `
+          <div class="result-item">
+            <div style="display: flex; gap: 0.75rem; align-items: flex-start;">
+              <span style="font-size: 1.2rem;">${res.isCorrect ? '+' : '-'}</span>
+              <div style="flex: 1;">
+                <strong>Вопрос ${idx + 1}</strong> <span style="font-size: 0.7rem; color: #666;">[${res.type}]</span><br>
+                <span>${escapeHtml(res.question)}</span><br>
+                <span style="color: ${res.isCorrect ? '#2e7d32' : '#c62828'}; font-size: 0.9rem;">
+                  <strong>Ваш ответ:</strong> ${escapeHtml(res.userAnswer)}
+                </span><br>
+                ${!res.isCorrect && res.correctAnswer ? `<span style="color: #1565c0; font-size: 0.9rem;"><strong>Правильный ответ:</strong> ${escapeHtml(res.correctAnswer)}</span><br>` : ''}
+              </div>
+            </div>
+          </div>
+        `;
+      });
+      
+      resultsHtml += `</div>`;
+      resultsContent.innerHTML = resultsHtml;
+      
+      viewQuiz.style.display = 'none';
+      viewResults.style.display = 'block';
+    }
+
+    function restartQuiz() {
+      userAnswers = new Array(questions.length).fill(null);
+      sequenceOrders = {};
+      matchAnswers = {};
+      currentIndex = 0;
+      saveAnswers();
+      updateProgress();
+      renderQuestion();
+      viewQuiz.style.display = 'block';
+      viewResults.style.display = 'none';
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    btnNext.addEventListener('click', nextQuestion);
+    btnPrev.addEventListener('click', prevQuestion);
+    btnFinish.addEventListener('click', finishQuiz);
+    btnRestart.addEventListener('click', restartQuiz);
+    
+    startQuiz();
+  </script>
+</body>
+</html>

@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Практика 7 — Оптимизация RAG-системы</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/style.css">
+<style>
+  .content-block img:not(.img-grid-item) {
+    display: block;
+    max-width: 100%;
+    height: auto;
+    margin: 1.5rem auto;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  }
+  .image-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    justify-content: center;
+    margin: 1.5rem 0;
+  }
+  .image-grid figure {
+    flex: 1 1 250px;
+    margin: 0;
+    text-align: center;
+  }
+  .image-grid img {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  }
+  .image-grid figcaption {
+    font-size: 0.85rem;
+    color: #555;
+    margin-top: 0.5rem;
+  }
+  .btn-lecture {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: #1e3a5f;
+    color: white !important;
+    padding: 0.75rem 1.5rem;
+    border-radius: 40px;
+    text-decoration: none;
+    font-weight: 600;
+    margin: 1rem 0 2rem;
+    transition: background 0.2s;
+  }
+  .btn-lecture:hover {
+    background: #2c5282;
+  }
+  .criteria-table-wrap {
+    overflow-x: auto;
+    margin: 1.5rem 0;
+  }
+  .criteria-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: transparent;
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  .criteria-table th,
+  .criteria-table td {
+    padding: 0.75rem 1rem;
+    text-align: left;
+    border-bottom: 1px solid #e2e8f0;
+  }
+  .criteria-table th {
+    background: transparent;
+    color: #1e3a5f;
+    font-weight: 600;
+    border-bottom: 2px solid #cbd5e1;
+  }
+  .criteria-table tr:last-child td {
+    border-bottom: none;
+  }
+  .practice-step {
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #e2e8f0;
+  }
+  .practice-step:last-child {
+    border-bottom: none;
+  }
+  .practice-step-number {
+    display: inline-block;
+    background: #1e3a5f;
+    color: white;
+    font-weight: 700;
+    font-size: 0.85rem;
+    padding: 0.2rem 0.6rem;
+    border-radius: 20px;
+    margin-right: 0.75rem;
+  }
+  .practice-step-title {
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin: 1rem 0 0.5rem 0;
+  }
+  .file-link {
+    background: #f0f4f8;
+    padding: 0.2rem 0.4rem;
+    border-radius: 6px;
+    font-family: monospace;
+    font-size: 0.9rem;
+  }
+</style>
+</head>
+<body>
+<header class="site-header"><div class="header-inner">
+<a class="logo" href="../index.html">RAG <span>курс</span></a>
+<nav class="nav-desktop">
+<a href="../index.html">Главная</a>
+<a href="../lectures/lecture8.html">Лекции</a>
+<a href="practice7.html">Практики</a>
+<a href="../tests/test.html">Тест</a>
+</nav>
+<button type="button" class="menu-toggle" aria-expanded="false" aria-label="Меню">Меню</button>
+</div>
+<nav class="nav-mobile">
+<a href="../index.html">Главная</a>
+<a href="../lectures/lecture8.html">Лекции</a>
+<a href="practice7.html">Практики</a>
+<a href="../tests/test.html">Тест</a>
+</nav>
+</header>
+<main>
+<nav class="breadcrumb"><a href="../index.html">Главная</a> / <a href="practice1.html">Практики</a> / Практика 7</nav>
+<header class="page-header"><h1>Методическое пособие №7. Оптимизация RAG-системы</h1></header>
+<div class="practice-goal"><p class="practice-goal__label">Цель занятия</p><p>Научиться оптимизировать RAG-систему с помощью кэширования, настройки параметров и улучшения промптов</p></div>
+<p class="practice-duration"><strong>Продолжительность:</strong> 4 академических часа</p>
+
+<div style="text-align: center;">
+  <a href="../lectures/lecture8.html" class="btn-lecture">📖 Перейти к лекции №8</a>
+</div>
+
+<section class="content-block">
+<h2>Пошаговая инструкция</h2>
+
+<p><strong>Теоретическое введение</strong></p>
+<p>Основные способы оптимизации RAG-системы:</p>
+<ul>
+<li><strong>Кэширование результатов</strong> - сохранение ответов на частые вопросы</li>
+<li><strong>Настройка размера фрагментов</strong> - баланс между полнотой и точностью</li>
+<li><strong>Улучшение промптов</strong> - более чёткие инструкции для LLM</li>
+<li><strong>Реранжирование</strong> - уточнение порядка результатов поиска</li>
+</ul>
+
+<!-- Шаг 1 -->
+<div class="practice-step">
+  <div class="practice-step-number">1</div>
+  <div class="practice-step-title">Реализация кэширования</div>
+  <p>Создайте файл <span class="file-link">scripts/cached_rag.py</span>:</p>
+  <pre><code class="language-python"># scripts/cached_rag.py
+import json
+import hashlib
+from datetime import datetime
+from chroma_manager import ChromaVectorStore
+from rag_pipeline import RAGPipeline</code></pre>
+  <p><em>Импортируются библиотеки для работы с JSON-файлами, хэширования строк (для создания ключей кэша), работы с датой и временем, а также классы для работы с векторной базой данных и RAG-пайплайном.</em></p>
+  <img src="../images/image40.png" alt="Создание скрипта cached_rag.py">
+</div>
+
+<!-- Шаг 2 -->
+<div class="practice-step">
+  <div class="practice-step-number">2</div>
+  <div class="practice-step-title">Определение класса CachedRAGPipeline и конструктора</div>
+  <pre><code class="language-python">class CachedRAGPipeline:
+    """RAG-пайплайн с кэшированием ответов"""
+    
+    def __init__(self, vector_store, use_local=True, cache_file="cache.json"):
+        self.rag = RAGPipeline(vector_store, use_local)
+        self.cache_file = cache_file
+        self.cache = self.load_cache()</code></pre>
+  <p><em>Создаётся класс CachedRAGPipeline для RAG-пайплайна с кэшированием ответов. В конструкторе инициализируется внутренний RAG-пайплайн, указывается имя файла для хранения кэша и загружается существующий кэш из файла.</em></p>
+</div>
+
+<!-- Шаг 3 -->
+<div class="practice-step">
+  <div class="practice-step-number">3</div>
+  <div class="practice-step-title">Метод загрузки кэша из файла</div>
+  <pre><code class="language-python">    def load_cache(self):
+        """Загрузка кэша из файла"""
+        try:
+            with open(self.cache_file, 'r', encoding='utf-8') as f:
+                return json.load(f)
+        except FileNotFoundError:
+            return {}</code></pre>
+  <p><em>Метод load_cache пытается открыть и загрузить JSON-файл с кэшем. Если файл не найден, возвращается пустой словарь. Это позволяет начать работу с пустым кэшем при первом запуске.</em></p>
+</div>
+
+<!-- Шаг 4 -->
+<div class="practice-step">
+  <div class="practice-step-number">4</div>
+  <div class="practice-step-title">Метод сохранения кэша в файл</div>
+  <pre><code class="language-python">    def save_cache(self):
+        """Сохранение кэша в файл"""
+        with open(self.cache_file, 'w', encoding='utf-8') as f:
+            json.dump(self.cache, f, ensure_ascii=False, indent=2)</code></pre>
+  <p><em>Метод save_cache сохраняет текущее состояние кэша в JSON-файл с отступами для удобства чтения. Параметр ensure_ascii=False позволяет сохранять русские символы без экранирования.</em></p>
+</div>
+
+<!-- Шаг 5 -->
+<div class="practice-step">
+  <div class="practice-step-number">5</div>
+  <div class="practice-step-title">Метод генерации ключа кэша</div>
+  <pre><code class="language-python">    def _get_cache_key(self, question):
+        """Генерация ключа кэша на основе вопроса"""
+        return hashlib.md5(question.lower().strip().encode()).hexdigest()</code></pre>
+  <p><em>Метод _get_cache_key преобразует вопрос в уникальный ключ кэша. Вопрос приводится к нижнему регистру, удаляются лишние пробелы, затем вычисляется MD5-хэш. Это позволяет одинаковым вопросам получать одинаковый ключ.</em></p>
+</div>
+
+<!-- Шаг 6 -->
+<div class="practice-step">
+  <div class="practice-step-number">6</div>
+  <div class="practice-step-title">Метод ответа на вопрос с кэшированием</div>
+  <pre><code class="language-python">    def answer_question(self, question):
+        """Ответ на вопрос с использованием кэша"""
+        cache_key = self._get_cache_key(question)
+        
+        # Проверка кэша
+        if cache_key in self.cache:
+            print(f"[CACHE HIT] Вопрос: {question[:50]}...")
+            return self.cache[cache_key]
+        
+        # Получение ответа от RAG
+        print(f"[CACHE MISS] Вопрос: {question[:50]}...")
+        result = self.rag.answer_question(question)
+        
+        # Сохранение в кэш
+        self.cache[cache_key] = result
+        self.save_cache()
+        
+        return result</code></pre>
+  <p><em>Основной метод answer_question сначала генерирует ключ кэша для вопроса. Если ключ найден в кэше (CACHE HIT), ответ возвращается мгновенно. Если ключа нет (CACHE MISS), вызывается RAG-пайплайн, результат сохраняется в кэш и возвращается.</em></p>
+</div>
+
+<!-- Шаг 7 -->
+<div class="practice-step">
+  <div class="practice-step-number">7</div>
+  <div class="practice-step-title">Метод очистки кэша</div>
+  <pre><code class="language-python">    def clear_cache(self):
+        """Очистка кэша"""
+        self.cache = {}
+        self.save_cache()
+        print("Кэш очищен")</code></pre>
+  <p><em>Метод clear_cache полностью очищает кэш, обнуляя словарь и сохраняя пустой файл. Это полезно, когда нужно сбросить сохранённые ответы.</em></p>
+</div>
+
+<!-- Шаг 8 -->
+<div class="practice-step">
+  <div class="practice-step-number">8</div>
+  <div class="practice-step-title">Метод получения статистики кэша</div>
+  <pre><code class="language-python">    def get_cache_stats(self):
+        """Статистика кэша"""
+        return {
+            'size': len(self.cache),
+            'cache_file': self.cache_file
+        }</code></pre>
+  <p><em>Метод get_cache_stats возвращает словарь со статистикой кэша: количество сохранённых записей и имя файла кэша.</em></p>
+</div>
+
+<!-- Шаг 9 -->
+<div class="practice-step">
+  <div class="practice-step-number">9</div>
+  <div class="practice-step-title">Главная функция тестирования</div>
+  <pre><code class="language-python">def main():
+    vector_store = ChromaVectorStore(
+        persist_directory="../data/chroma_db",
+        collection_name="rag_documents"
+    )
+    
+    cached_rag = CachedRAGPipeline(vector_store, use_local=True)
+    
+    # Тестирование
+    questions = [
+        "Что такое искусственный интеллект?",
+        "Что такое искусственный интеллект?",  # Повторный вопрос
+        "Как работает машинное обучение?"
+    ]
+    
+    for q in questions:
+        result = cached_rag.answer_question(q)
+        print(f"Ответ: {result['answer'][:100]}...")
+        print(f"Источники: {', '.join(result['sources'])}")
+        print("-"*40)
+    
+    stats = cached_rag.get_cache_stats()
+    print(f"Статистика кэша: {stats['size']} записей")
+
+if __name__ == "__main__":
+    main()</code></pre>
+  <p><em>В главной функции создаётся подключение к векторной базе данных, инициализируется кэшированный RAG-пайплайн. Выполняется тестирование на трёх вопросах (второй вопрос повторяет первый). Для каждого вопроса выводится ответ и источники. В конце выводится статистика кэша.</em></p>
+  <img src="../images/image41.png" alt="Результаты кэширования">
+</div>
+
+<!-- Шаг 10 -->
+<div class="practice-step">
+  <div class="practice-step-number">10</div>
+  <div class="practice-step-title">Настройка размера фрагментов</div>
+  <p>Создайте файл <span class="file-link">scripts/tune_chunk_size.py</span>:</p>
+  <pre><code class="language-python"># scripts/tune_chunk_size.py
+import json
+import time
+from langchain_text_splitters import RecursiveCharacterTextSplitter
+from chroma_manager import ChromaVectorStore</code></pre>
+  <p><em>Импортируются библиотеки для работы с JSON-файлами, измерения времени выполнения, разбиения текста на фрагменты (из LangChain) и класс для работы с векторной базой данных Chroma.</em></p>
+  <img src="../images/image42.png" alt="Настройка размера фрагментов">
+</div>
+
+<!-- Шаг 11 -->
+<div class="practice-step">
+  <div class="practice-step-number">11</div>
+  <div class="practice-step-title">Определение функции тестирования размеров фрагментов</div>
+  <pre><code class="language-python">def test_chunk_sizes(original_docs, chunk_sizes=[300, 500, 800, 1000]):
+    """Тестирование разных размеров фрагментов"""
+    
+    results = []
+    
+    for size in chunk_sizes:
+        print(f"\nТестирование chunk_size = {size}")
+        
+        # Разбиение на фрагменты
+        splitter = RecursiveCharacterTextSplitter(
+            chunk_size=size,
+            chunk_overlap=size // 10,
+            separators=["\n\n", "\n", ". ", " ", ""]
+        )</code></pre>
+  <p><em>Создаётся функция test_chunk_sizes, которая принимает список исходных документов и список размеров фрагментов для тестирования. Для каждого размера создаётся сплиттер с размером фрагмента и перекрытием, равным 10% от размера.</em></p>
+</div>
+
+<!-- Шаг 12 -->
+<div class="practice-step">
+  <div class="practice-step-number">12</div>
+  <div class="practice-step-title">Разбиение документов на фрагменты</div>
+  <pre><code class="language-python">        chunks = []
+        for doc in original_docs:
+            doc_chunks = splitter.split_text(doc['text'])
+            for i, chunk in enumerate(doc_chunks):
+                chunks.append({
+                    'text': chunk,
+                    'source': doc['source'],
+                    'chunk_id': i,
+                    'length': len(chunk)
+                })</code></pre>
+  <p><em>Для каждого исходного документа выполняется разбиение на фрагменты заданного размера. Каждый фрагмент сохраняется в виде словаря с текстом, источником, идентификатором и длиной.</em></p>
+</div>
+
+<!-- Шаг 13 -->
+<div class="practice-step">
+  <div class="practice-step-number">13</div>
+  <div class="practice-step-title">Сбор статистики и сохранение результатов</div>
+  <pre><code class="language-python">        results.append({
+            'chunk_size': size,
+            'num_chunks': len(chunks),
+            'avg_length': sum(c['length'] for c in chunks) / len(chunks) if chunks else 0
+        })
+        
+        print(f"  Фрагментов: {len(chunks)}")
+        print(f"  Средняя длина: {results[-1]['avg_length']:.0f}")
+    
+    return results</code></pre>
+  <p><em>Для каждого размера фрагмента собирается статистика: количество полученных фрагментов и средняя длина. Результаты сохраняются в список и выводятся на экран.</em></p>
+</div>
+
+<!-- Шаг 14 -->
+<div class="practice-step">
+  <div class="practice-step-number">14</div>
+  <div class="practice-step-title">Определение главной функции main</div>
+  <pre><code class="language-python">def main():
+    # Загрузка исходных документов
+    with open("../data/chunks.json", 'r', encoding='utf-8') as f:
+        chunks = json.load(f)
+    
+    # Преобразование в формат, понятный splitter'у
+    original_docs = []
+    sources = set(c['source'] for c in chunks)
+    
+    for source in sources:
+        doc_text = " ".join([c['text'] for c in chunks if c['source'] == source])
+        original_docs.append({'source': source, 'text': doc_text})</code></pre>
+  <p><em>В главной функции загружаются ранее созданные фрагменты из файла chunks.json. Затем выполняется преобразование: для каждого уникального источника объединяются все его фрагменты в один полный текст.</em></p>
+</div>
+
+<!-- Шаг 15 -->
+<div class="practice-step">
+  <div class="practice-step-number">15</div>
+  <div class="practice-step-title">Запуск тестирования и вывод результатов</div>
+  <pre><code class="language-python">    results = test_chunk_sizes(original_docs)
+    
+    print("\n" + "="*50)
+    print("Результаты тестирования:")
+    for r in results:
+        print(f"chunk_size={r['chunk_size']}: {r['num_chunks']} фрагментов, ср.длина={r['avg_length']:.0f}")
+
+if __name__ == "__main__":
+    main()</code></pre>
+  <p><em>Вызывается функция тестирования с загруженными документами. После завершения тестирования выводятся итоговые результаты для каждого размера фрагмента: количество фрагментов и средняя длина.</em></p>
+  <img src="../images/image43.png" alt="Результаты настройки размера фрагментов">
+</div>
+
+<!-- Шаг 16 -->
+<div class="practice-step">
+  <div class="practice-step-number">16</div>
+  <div class="practice-step-title">Улучшение промптов</div>
+  <p>Создайте файл <span class="file-link">scripts/improved_prompts.py</span>:</p>
+  <pre><code class="language-python"># scripts/improved_prompts.py
+from chroma_manager import ChromaVectorStore
+from rag_pipeline import RAGPipeline</code></pre>
+  <p><em>Импортируются класс для работы с векторной базой данных Chroma и класс RAGPipeline для выполнения поиска и генерации ответов.</em></p>
+  <img src="../images/image44.png" alt="Улучшение промптов">
+</div>
+
+<!-- Шаг 17 -->
+<div class="practice-step">
+  <div class="practice-step-number">17</div>
+  <div class="practice-step-title">Определение класса ImprovedRAGPipeline</div>
+  <pre><code class="language-python">class ImprovedRAGPipeline(RAGPipeline):
+    """RAG-пайплайн с улучшенными промптами"""
+    
+    def create_prompt(self, query, context):
+        """Улучшенная версия промпта"""</code></pre>
+  <p><em>Создаётся класс ImprovedRAGPipeline, который наследуется от базового класса RAGPipeline. Переопределяется метод create_prompt, который будет использовать улучшенную версию промпта.</em></p>
+</div>
+
+<!-- Шаг 18 -->
+<div class="practice-step">
+  <div class="practice-step-number">18</div>
+  <div class="practice-step-title">Улучшенный промпт (часть 1 - вступление и контекст)</div>
+  <pre><code class="language-python">        prompt = f"""Ты - экспертный ассистент по работе с документами. Твоя задача - давать точные и полезные ответы на вопросы пользователя, используя ТОЛЬКО предоставленный контекст.
+
+КОНТЕКСТ (информация из документов):
+{context}
+
+ВОПРОС ПОЛЬЗОВАТЕЛЯ: {query}</code></pre>
+  <p><em>Промпт начинается с чёткого определения роли модели ("экспертный ассистент") и задачи. Затем вставляются контекст (найденные документы) и вопрос пользователя.</em></p>
+</div>
+
+<!-- Шаг 19 -->
+<div class="practice-step">
+  <div class="practice-step-number">19</div>
+  <div class="practice-step-title">Улучшенный промпт (часть 2 - правила ответа)</div>
+  <pre><code class="language-python">
+ПРАВИЛА ОТВЕТА:
+1. Используй ТОЛЬКО информацию из контекста выше
+2. Если контекст не содержит ответа, чётко скажи: "В предоставленных документах нет информации по этому вопросу"
+3. Если контекст содержит частичный ответ, укажи, какой информации не хватает
+4. Отвечай на том же языке, на котором задан вопрос
+5. Будь конкретным и по существу, без лишних деталей</code></pre>
+  <p><em>Определяются пять чётких правил для модели: использование только контекста, обработка отсутствия информации, указание на неполноту ответа, соответствие языку вопроса и лаконичность.</em></p>
+</div>
+
+<!-- Шаг 20 -->
+<div class="practice-step">
+  <div class="practice-step-number">20</div>
+  <div class="practice-step-title">Улучшенный промпт (часть 3 - формат и завершение)</div>
+  <pre><code class="language-python">
+ФОРМАТ ОТВЕТА:
+[Твой ответ здесь]
+
+Помни: твоя задача - помочь пользователю, основываясь ТОЛЬКО на предоставленных документах.
+
+ОТВЕТ:"""
+        return prompt</code></pre>
+  <p><em>Указывается ожидаемый формат ответа. Добавляется напоминание об основной задаче. Промпт завершается маркером ОТВЕТ:, после которого модель должна сгенерировать свой ответ.</em></p>
+</div>
+
+<!-- Шаг 21 -->
+<div class="practice-step">
+  <div class="practice-step-number">21</div>
+  <div class="practice-step-title">Определение главной функции main</div>
+  <pre><code class="language-python">def main():
+    vector_store = ChromaVectorStore(
+        persist_directory="../data/chroma_db",
+        collection_name="rag_documents"
+    )
+    
+    # Стандартный RAG
+    standard_rag = RAGPipeline(vector_store, use_local=True)
+    
+    # Улучшенный RAG
+    improved_rag = ImprovedRAGPipeline(vector_store, use_local=True)</code></pre>
+  <p><em>В главной функции создаётся подключение к векторной базе данных. Затем инициализируются два RAG-пайплайна: стандартный (с базовым промптом) и улучшенный (с новым промптом).</em></p>
+</div>
+
+<!-- Шаг 22 -->
+<div class="practice-step">
+  <div class="practice-step-number">22</div>
+  <div class="practice-step-title">Сравнение стандартного и улучшенного промптов</div>
+  <pre><code class="language-python">    # Сравнение
+    test_query = "Что такое искусственный интеллект?"
+    
+    print("СТАНДАРТНЫЙ ПРОМПТ:")
+    standard_result = standard_rag.answer_question(test_query)
+    print(standard_result['answer'])
+    
+    print("\n" + "="*60)
+    print("УЛУЧШЕННЫЙ ПРОМПТ:")
+    improved_result = improved_rag.answer_question(test_query)
+    print(improved_result['answer'])
+
+if __name__ == "__main__":
+    main()</code></pre>
+  <p><em>Задаётся тестовый вопрос. Последовательно вызываются оба RAG-пайплайна для получения ответов. Выводятся результаты для визуального сравнения качества ответов при использовании разных промптов.</em></p>
+  <img src="../images/image45.png" alt="Сравнение промптов">
+</div>
+
+<h2>Задание для самостоятельного выполнения</h2>
+<ul>
+<li>Измерьте время ответа с кэшем и без него для 10 повторяющихся вопросов.</li>
+<li>Протестируйте разные размеры фрагментов (300, 500, 800, 1000) и выберите оптимальный для ваших данных.</li>
+<li>Создайте A/B-тест для сравнения двух версий промпта (попросите 3-х студентов оценить качество ответов).</li>
+<li>Реализуйте простое реранжирование: после поиска в Chroma пересортируйте результаты с помощью кросс-энкодера.</li>
+</ul>
+
+<h2>Контрольные вопросы</h2>
+<ol>
+<li>Как кэширование влияет на производительность RAG-системы?</li>
+<li>Какие параметры разбиения текста влияют на качество поиска?</li>
+<li>Почему улучшение промпта может повысить качество ответов?</li>
+<li>Что такое реранжирование и когда оно полезно?</li>
+<li>Как измерить эффективность оптимизации?</li>
+</ol>
+
+<h2>Критерии оценки</h2>
+<div class="criteria-table-wrap">
+  <table class="criteria-table">
+    <thead>
+      <tr><th>Критерий</th><th>Баллы</th></tr>
+    </thead>
+    <tbody>
+      <tr><td style="padding: 0.75rem 1rem;">Реализация кэширования</td><td style="text-align: center;">2</td></tr>
+      <tr><td style="padding: 0.75rem 1rem;">Тестирование разных размеров фрагментов</td><td style="text-align: center;">2</td></tr>
+      <tr><td style="padding: 0.75rem 1rem;">Улучшение промптов</td><td style="text-align: center;">2</td></tr>
+      <tr><td style="padding: 0.75rem 1rem;">Измерение производительности</td><td style="text-align: center;">2</td></tr>
+      <tr><td style="padding: 0.75rem 1rem;">Выполнено дополнительное задание</td><td style="text-align: center;">2</td></tr>
+    </tbody>
+  </table>
+</div>
+<p><strong>Максимальный балл: 10</strong></p>
+</section>
+
+<nav class="nav-prev-next"><a href="practice6.html">← Практика 6</a><a href="practice8.html">Практика 8 →</a></nav>
+</main>
+<footer class="site-footer">Практика 7</footer>
+<script src="../js/main.js"></script>
+</body>
+</html>
